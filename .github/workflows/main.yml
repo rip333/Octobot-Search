@@ -15,7 +15,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '19'
+        node-version: '18'
 
     - name: Install Dependencies
       run: npm install
@@ -27,5 +27,5 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
         branch: gh-pages  # The branch the action should deploy to.
-        folder: .next      # The folder the action should deploy.
+        folder: out      # The folder the action should deploy.
         token: ${{ secrets.GITHUB_TOKEN }}  # GitHub will automatically create this secret to use in your workflow.
