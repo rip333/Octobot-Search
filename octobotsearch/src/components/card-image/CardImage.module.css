@@ -1,0 +1,8 @@
+.image {
+    display: inline-block;
+}
+
+.image img{
+    padding: 12px;
+    border-radius: 1.65rem;
+}

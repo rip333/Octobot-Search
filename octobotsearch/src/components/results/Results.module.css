@@ -1,0 +1,21 @@
+/* Results.css */
+.resultsContainer {
+  padding: 1rem;
+  margin: 1rem;
+  background-color: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: black;
+  text-align: center;
+}
+
+.NoResults {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: x-large;
+  font-weight: 300;
+  color: rgb(224, 224, 224);
+}
+
+.NoResults img {
+  width: 10%;
+  filter: grayscale(50%);
+}

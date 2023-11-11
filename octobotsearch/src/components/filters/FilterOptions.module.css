@@ -1,0 +1,14 @@
+/* FilterOptions.module.css */
+
+.container {
+    margin: 6px;
+    padding-block: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    font-size: medium;
+}
+
+.checkboxContainer {
+    padding-inline: 12px;
+}

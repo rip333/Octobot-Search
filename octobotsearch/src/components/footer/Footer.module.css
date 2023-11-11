@@ -1,0 +1,29 @@
+/* Footer.module.css */
+.footer {
+    background-color: inherit;
+    padding: 1rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .linkItem {
+    margin: 0 1rem;
+  }
+  
+  .link {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+  
+    &:hover {
+      color: #0056b3;
+    }
+  }
+  

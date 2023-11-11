@@ -1,0 +1,206 @@
+[
+    {
+        "name": "Adam Warlock",
+        "setid": "3dd91f75-3cb4-407f-8797-d9fb430cb4ae"
+    },
+    {
+        "name": "Ant-Man",
+        "setid": "0bbed6ed-c623-4b59-abaf-79c0d7137944"
+    },
+    {
+        "name": "Archangel",
+        "setid": "10fe7052-0754-45f8-a7e5-f596492dd112"
+    },
+    {
+        "name": "Bishop",
+        "setid": "20b15de5-bfa8-43d6-ba16-e00aa924dc68"
+    },
+    {
+        "name": "Black Panther",
+        "setid": "74cd278a-5f2c-426b-8888-94389ad91307"
+    },
+    {
+        "name": "Black Widow",
+        "setid": "9f61b8cc-f3f4-439f-9fdb-60e9b2e03ef4"
+    },
+    {
+        "name": "Cable",
+        "setid": "2a45f82c-3a4e-48ea-926f-491e31729b28"
+    },
+    {
+        "name": "Captain America",
+        "setid": "cd4e694d-ad20-4a91-97de-7f30e479b49a"
+    },
+    {
+        "name": "Captain Marvel",
+        "setid": "913eb8f9-282d-4c54-b8e7-a8503ae0fe3d"
+    },
+    {
+        "name": "Colossus",
+        "setid": "bc684efc-d6b6-4ac3-a5f7-7466cfc0b3ce"
+    },
+    {
+        "name": "Cyclops",
+        "setid": "4db68fa1-e222-4d4e-b06c-16dd9b2fefef"
+    },
+    {
+        "name": "Deadpool",
+        "setid": "e231da04-3d1b-4314-8097-ed8e40cc14c2"
+    },
+    {
+        "name": "Doctor Strange",
+        "setid": "40f92579-6ce7-4788-989c-c7c368b4fcee"
+    },
+    {
+        "name": "Domino",
+        "setid": "0aa580cc-03e7-4ef0-9629-567a046884b5"
+    },
+    {
+        "name": "Drax",
+        "setid": "304f4906-bc9e-47bf-97fe-95b39868e8b5"
+    },
+    {
+        "name": "Gambit",
+        "setid": "ad22c408-ede5-4f34-89b0-fc1c7843f5d6"
+    },
+    {
+        "name": "Gamora",
+        "setid": "cdca7254-c447-402a-863a-6fe6ac9d7aa7"
+    },
+    {
+        "name": "Ghost-Spider",
+        "setid": "75365f00-f225-4ca6-a458-392112069d62"
+    },
+    {
+        "name": "Groot",
+        "setid": "e8672602-068f-4464-8204-659c70d1a9f2"
+    },
+    {
+        "name": "Hawkeye",
+        "setid": "1797403e-96a6-436a-aada-2423d1163ed3"
+    },
+    {
+        "name": "Hulk",
+        "setid": "5ccd14dd-c80a-4bca-8daa-c4e17487752e"
+    },
+    {
+        "name": "Iron Man",
+        "setid": "d786e9fc-73f4-42ba-b8ec-38052a853578"
+    },
+    {
+        "name": "Ironheart",
+        "setid": "fea12fa8-a0d8-4fdd-822b-cadb9d1e7f9e"
+    },
+    {
+        "name": "Magik",
+        "setid": "1378e665-a29f-4186-b98e-dfe71a55f92b"
+    },
+    {
+        "name": "Ms. Marvel",
+        "setid": "8675d0fa-1128-4c6b-bffb-9554237615f7"
+    },
+    {
+        "name": "Nebula",
+        "setid": "470b185d-42e4-413b-b516-854b4b2f0231"
+    },
+    {
+        "name": "Nova",
+        "setid": "33eb3bd6-99e9-4a71-89f5-4f27c3d9dc5a"
+    },
+    {
+        "name": "Phoenix",
+        "setid": "9c5e7756-f108-4d05-8228-5a8006c30cb2"
+    },
+    {
+        "name": "Psylocke",
+        "setid": "61b007b1-d4a4-49b5-b302-aee52bb48ab6"
+    },
+    {
+        "name": "Quicksilver",
+        "setid": "b6de2652-ca18-410d-a3a0-e0b98b77c03a"
+    },
+    {
+        "name": "Rocket Raccoon",
+        "setid": "9f96ee67-ec01-4660-9551-d3aac0386d72"
+    },
+    {
+        "name": "Rogue",
+        "setid": "5df00a39-d1de-44cc-a659-892278a1df60"
+    },
+    {
+        "name": "SP//dr Suit",
+        "setid": "48ae0b1b-e874-4ef7-b1b8-2b07c2ad0bad"
+    },
+    {
+        "name": "Scarlet Witch",
+        "setid": "f11cf578-2b5d-4831-ad0f-8b4a6254ee48"
+    },
+    {
+        "name": "Shadowcat",
+        "setid": "6f7bcb1e-8309-45a6-9d00-0750ef16b666"
+    },
+    {
+        "name": "She-Hulk",
+        "setid": "7b490faa-33ba-4603-9c8e-7df41ddd3aab"
+    },
+    {
+        "name": "Spectrum",
+        "setid": "0dae58a0-f3a2-4dac-b5d7-15f2fa30f969"
+    },
+    {
+        "name": "Spider-Ham",
+        "setid": "37726800-7f20-4b47-8cb5-ab1f96d3a898"
+    },
+    {
+        "name": "Spider-Man",
+        "setid": "fe0f49aa-d3b4-4604-a43c-eaa18bbe1601"
+    },
+    {
+        "name": "Spider-Man",
+        "setid": "6c95c419-7658-4d74-935c-5da7a68ceeb0"
+    },
+    {
+        "name": "Spider-Woman",
+        "setid": "36b9663a-6d1f-4e79-9d17-eb02e840ed87"
+    },
+    {
+        "name": "Star-Lord",
+        "setid": "393822d6-5b6e-4871-bdb0-cccd05dec09c"
+    },
+    {
+        "name": "Storm",
+        "setid": "0a8b0995-f9c1-4ba8-8e98-f248853c91db"
+    },
+    {
+        "name": "Thor",
+        "setid": "8e6daeb2-989c-46ef-a3f3-c15547461daa"
+    },
+    {
+        "name": "Valkyrie",
+        "setid": "e9db37ef-0ea9-436d-8fc8-109b004537df"
+    },
+    {
+        "name": "Venom",
+        "setid": "19ee1d90-0a7d-466c-9c74-5251ada1045d"
+    },
+    {
+        "name": "Vision",
+        "setid": "29a6213d-960f-45f6-a9ae-b2833601ae98"
+    },
+    {
+        "name": "War Machine",
+        "setid": "27668a99-eff2-4363-83c2-09001b6932ad"
+    },
+    {
+        "name": "Wasp",
+        "setid": "2b89338e-8af3-497a-a77f-8f49f0f5792b"
+    },
+    {
+        "name": "Wolverine",
+        "setid": "fe89fc7c-7bb9-456c-a3a6-59f7b29ecada"
+    },
+    {
+        "name": "X-23",
+        "setid": "04a65409-8197-4796-8634-3728110ae62d"
+    }
+]
