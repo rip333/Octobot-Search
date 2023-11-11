@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import heroes from '../../heroes.json'; // Adjust the path to where your JSON file is located
 import styles from "./HeroSelect.module.css";
+import { useRouter } from 'next/router'; // Import useRouter
 
-interface HeroSelectProps {
-    handleHeroSelect: (searchQuery: string) => void;
-}
+const HeroSelect: React.FC = () => {
+    const router = useRouter(); // Initialize useRouter
 
-const HeroSelect: React.FC<HeroSelectProps> = ({handleHeroSelect}) => {
-    // Future implementation for the onClick handler
     const handleClick = (setid: string) => {
-        handleHeroSelect(`input=(si:"${setid}")`);
+        router.push(`/search?query=input=(si:"${setid}")`);
     };
 
     return (

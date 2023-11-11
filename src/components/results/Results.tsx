@@ -4,12 +4,13 @@ import { Card } from "../../models/Card";
 import CardImage from "../card-image/CardImage";
 
 interface ResultsProps {
-    results: Array<Card>; // Use a more specific type depending on your actual data structure
+    results: Array<Card>;
+    loading: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ results }) => {
-    
-    if (results.length > 0) {
+const Results: React.FC<ResultsProps> = ({ results, loading }) => {
+
+    if (results.length > 0 || loading) {
         return (
             <div className={styles.resultsContainer}>
                 <ul className={styles.resultsList}>
