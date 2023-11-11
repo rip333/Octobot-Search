@@ -1,31 +1,30 @@
-name: Build and Deploy
+name: GitHub Pages deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
 
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+      - name: Installing my packages
+        run: npm ci
 
-    - name: Install Dependencies
-      run: npm install
+      - name: Build my App
+        run: npm run build && npm run export && touch ./out/.nojekyll
 
-    - name: Build
-      run: npm run build
-
-    - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@4.1.4
-      with:
-        branch: gh-pages  # The branch the action should deploy to.
-        folder: out      # The folder the action should deploy.
-        token: ${{ secrets.GITHUB_TOKEN }}  # GitHub will automatically create this secret to use in your workflow.
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages # The branch the action should deploy to.
+          folder: out # The folder the action should deploy.
