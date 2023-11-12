@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import heroes from '../../heroes.json'; // Adjust the path to where your JSON file is located
+import React from 'react';
+import heroes from '../../data/heroes.json'; // Adjust the path to where your JSON file is located
 import styles from "./HeroSelect.module.css";
 import { useRouter } from 'next/router'; // Import useRouter
 

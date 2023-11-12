@@ -1,11 +1,11 @@
-.heroButtonDiv {
+.cardSets {
     padding: 8px;
     max-width: 100%;
     margin-inline: 20px;
     text-align: center;
 }
 
-.heroButton {
+.setButton {
     border: none;
     color: white;
     padding: 5px 8px;
@@ -19,6 +19,6 @@
     background-color: #ed1d2479;
 }
 
-.heroButton:hover {
+.setButton:hover {
     background-color: #ED1D24;
 }
