@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import axios from "axios";
 import { Card } from "@/models/Card";
 import Results from "@/components/results/Results";
+import { debug } from "console";
 
-// pages/index.tsx
-const Set: React.FC = () => {
+const Page: React.FC = () => {
 
     const router = useRouter();
     const [cards, setCards] = useState<Card[]>([]);
@@ -15,20 +15,16 @@ const Set: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-
             try {
-                let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?input=(si:"${router.query.setId}")`);
+                let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?input=(${router.query.filter}:"${router.query.type}")`);
                 setCards(results?.data);
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching sets:', error);
             }
             finally {
                 setLoading(false);
             }
-
         };
-
         fetchData();
     }, []);
 
@@ -41,4 +37,4 @@ const Set: React.FC = () => {
     );
 }
 
-export default Set;
+export default Page;

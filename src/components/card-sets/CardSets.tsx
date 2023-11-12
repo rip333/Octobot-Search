@@ -9,17 +9,32 @@ interface CardSetsProps {
 
 const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
     const router = useRouter(); // Initialize useRouter
+    let uniqueTypes: string[] = [];
+    cardSets.forEach(set => {
+        !uniqueTypes.includes(set.Type) && uniqueTypes.push(set.Type);
+    });
 
     const handleClick = (Id: string) => {
-        router.push(`/set?setId=${Id}`);
+        router.push(`/si/${Id}`);
     };
+
+    cardSets.sort((a, b) => a.Name.localeCompare(b.Name));
 
     return (
         <div className={styles.cardSets}>
-            {cardSets.map(set => (
-                <button className={styles.setButton} key={set.Id} onClick={() => handleClick(set.Id)}>
-                    {set.Name}
-                </button>
+            {uniqueTypes.map(type => (
+                <div key={type}>
+                    <h3>{type}</h3>
+                    {cardSets.filter(set => set.Type === type).map(filteredSet => (
+                        <button
+                            className={styles.setButton}
+                            key={filteredSet.Id}
+                            onClick={() => handleClick(filteredSet.Id)}
+                        >
+                            {filteredSet.Name}
+                        </button>
+                    ))}
+                </div>
             ))}
         </div>
     );

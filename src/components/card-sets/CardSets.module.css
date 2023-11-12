@@ -4,21 +4,3 @@
     margin-inline: 20px;
     text-align: center;
 }
-
-.setButton {
-    border: none;
-    color: white;
-    padding: 5px 8px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 11px;
-    margin: 4px 6px;
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #ed1d2479;
-}
-
-.setButton:hover {
-    background-color: #ED1D24;
-}

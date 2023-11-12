@@ -24,4 +24,6 @@ interface Printing {
   PackId: string;
   PackNumber: string;
   Flavor?: string;
+  SetNumber: string;
+  SetId: string;
 }
