@@ -4,10 +4,8 @@ import { NextRouter } from "next/router";
 
 const searchParameters = [
     'ru',
-    'cl',
     'n',
     'sn',
-    'ty',
     'tr'
 ];
 
@@ -46,11 +44,5 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
 };
 
 export const handleSearch = async (query: string, router: NextRouter, incomplete?: boolean, origin?: string) => {    
-    const filterOptions = {
-        incomplete: incomplete ?? false,
-        origin: origin ?? "official",
-    };
-    const searchQuery = createSearchQuery(query, filterOptions);
-    
-    router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
+    router.push(`/search?query=${encodeURIComponent(query)}&incomplete=${incomplete}&origin=${origin}`);
 };

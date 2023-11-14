@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './SearchBar.module.css'; // Import the CSS Module
-import {  useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import { handleSearch } from '@/searchUtils';
 
 interface SearchBarProps {
@@ -9,11 +9,19 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
-    const [query, setQuery] = useState('');
+    const [searchText, setSearchText] = useState('');
     const router = useRouter();
+
+    // Update searchText when the router query changes
+    useEffect(() => {
+        if (router.query.query && typeof router.query.query === 'string') {
+            setSearchText(router.query.query);
+        }
+    }, [router.query.query]);
+
     const handleForm = async (event: React.FormEvent) => {
         event.preventDefault()
-        handleSearch(query, router, incomplete, origin);
+        handleSearch(searchText, router, incomplete, origin);
     };
 
     return (
@@ -24,9 +32,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
                         aria-label="Search"
                         placeholder="Search"
                         type="search"
-                        value={query}
+                        value={searchText}
                         autoFocus required
-                        onChange={(e) => setQuery(e.target.value)}
+                        onChange={(e) => setSearchText(e.target.value)}
                     />
                 </div>
                 <div className={styles.searchContainer}>

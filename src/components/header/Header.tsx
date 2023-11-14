@@ -6,6 +6,8 @@ import FilterOptions from '../filters/FilterOptions';
 import Link from 'next/link';
 import Image from 'next/image';
 
+
+
 const Header: React.FC = ({ }) => {
   const [incomplete, setIncomplete] = useState(false);
   const [origin, setOrigin] = useState('official');
