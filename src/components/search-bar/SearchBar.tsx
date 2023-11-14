@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import styles from './SearchBar.module.css'; // Import the CSS Module
+import {  useRouter } from 'next/router';
+import { handleSearch } from '@/searchUtils';
 
 interface SearchBarProps {
-    handleSearch: (searchQuery: string) => void;
+    incomplete?: boolean;
+    origin?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ handleSearch }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
     const [query, setQuery] = useState('');
-
+    const router = useRouter();
     const handleForm = async (event: React.FormEvent) => {
         event.preventDefault()
-        handleSearch(query);
+        handleSearch(query, router, incomplete, origin);
     };
 
     return (

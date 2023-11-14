@@ -16,13 +16,14 @@ const Classifications: React.FC = () => {
     const router = useRouter(); // Initialize useRouter
 
     const handleClick = (Id: string) => {
-        router.push(`/cl/${Id}`);
+        router.push(`/cards/cl/${Id}`);
     };
 
     return (
         <div className={styles.classifications}>
+            <h3>Classifications</h3>
             {c12ns.map(cl => (
-                <button className={styles.classificationsButton} style={{ backgroundColor: cl.color }} key={cl.name} onClick={() => handleClick(cl.name)}>
+                <button className={styles.classificationsButton} key={cl.name} onClick={() => handleClick(cl.name)}>
                     {cl.name}
                 </button>
             ))}

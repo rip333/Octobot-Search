@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './Results.module.css';
 import { Card } from "../../models/Card";
 import CardImage from "../card-image/CardImage";
+import Link from 'next/link';
 
 interface ResultsProps {
     results: Array<Card>;
@@ -15,7 +16,9 @@ const Results: React.FC<ResultsProps> = ({ results, loading }) => {
             <div className={styles.resultsContainer}>
                 <ul className={styles.resultsList}>
                     {results.map((card, index) => (
-                        <CardImage key={index} card={card} />
+                        <Link key={index} href={`/card/${card.Id}`}>
+                            <CardImage card={card} />
+                        </Link>
                     ))}
                 </ul>
             </div>

@@ -4,6 +4,7 @@
     padding: 1rem 0;
     text-align: center;
     font-size: 0.9rem;
+    color: white;
   }
   
   .links {
@@ -21,9 +22,5 @@
     color: #007bff;
     text-decoration: none;
     transition: color 0.2s ease-in-out;
-  
-    &:hover {
-      color: #0056b3;
-    }
   }
   

@@ -7,6 +7,7 @@ import axios from "axios";
 import CardSets from "@/components/card-sets/CardSets";
 import CardPacks from "@/components/card-packs/CardPacks";
 import Classifications from "@/components/classifications/Classifications";
+import Footer from "@/components/footer/Footer";
 
 const Home: React.FC = () => {
   const [sets, setSets] = useState<CardSet[]>([]);
@@ -42,6 +43,7 @@ const Home: React.FC = () => {
         <CardSets cardSets={sets} />
         <CardPacks cardPacks={packs} />
         <Classifications />
+        <Footer />
       </div>
     </div>
   );

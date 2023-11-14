@@ -2,9 +2,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'AvenirNextLtPro';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #001126;
@@ -22,7 +20,7 @@ button {
     font-size: 13px;
     margin: 4px 6px;
     border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'AvenirNextLtPro';
     background-color: #ed1d2479;
 }
 
@@ -34,4 +32,14 @@ h3 {
     color: white;
 }
 
-/* Add more global styles as needed */
+
+@font-face {
+    font-family: 'ChampionsIcons';
+    src: url('/fonts/ChampionsIcons.ttf');
+}
+
+@font-face {
+    font-family: 'AvenirNextLtPro';
+    src: url('/fonts/AvenirNextLTPro-Regular.otf');
+}
+

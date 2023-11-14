@@ -1,5 +1,7 @@
 // searchUtils.ts
 
+import { NextRouter } from "next/router";
+
 const searchParameters = [
     'ru',
     'cl',
@@ -13,12 +15,12 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
     // Use a regular expression to match phrases inside quotes or single words
     const regex = /"[^"]+"|\S+/g;
     const tokens = [];
-
+    
     let match;
     while ((match = regex.exec(searchString)) !== null) {
         tokens.push(match[0]);
     }
-
+    
     // Process each token
     const queryParts = tokens.map(token => {
         // Remove quotes for the current token if it's a phrase
@@ -26,7 +28,7 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
         const encodedToken = encodeURIComponent(processedToken);
         return searchParameters.map(param => `${param}:"${encodedToken}"`).join('|');
     });
-
+    
     // Combine query parts with OR operators
     const combinedQuery = queryParts.join('|');
     
@@ -41,4 +43,14 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
     
     // Final combined query with filters
     return `input=(${combinedQuery})${filterQueries.length > 0 ? '%26' + filterQueries.join('%26') : ''}`;
+};
+
+export const handleSearch = async (query: string, router: NextRouter, incomplete?: boolean, origin?: string) => {    
+    const filterOptions = {
+        incomplete: incomplete ?? false,
+        origin: origin ?? "official",
+    };
+    const searchQuery = createSearchQuery(query, filterOptions);
+    
+    router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
 };

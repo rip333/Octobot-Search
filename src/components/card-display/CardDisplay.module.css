@@ -1,0 +1,22 @@
+.cardDisplay {
+    color: white;
+    font-family: 'AvenirNextLtPro';
+    padding: 24px;
+    width: 90%;
+    display: flex;
+    align-items: flex-start;
+}
+
+.leftContent {
+    flex: 1;
+    text-align: right;
+}
+
+.rightContent {
+    flex: 2;
+    padding: 12px;
+}
+
+.championsIcon {
+    font-family: 'ChampionsIcons';
+}

@@ -11,7 +11,7 @@ const CardSets: React.FC<CardPacksProps> = ({ cardPacks }) => {
     const router = useRouter(); // Initialize useRouter
 
     const handleClick = (Id: string) => {
-        router.push(`/pi/${Id}`);
+        router.push(`/cards/pi/${Id}`);
     };
 
     // Sorting cardPacks by the number property

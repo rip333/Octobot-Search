@@ -9,13 +9,31 @@ interface CardSetsProps {
 
 const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
     const router = useRouter(); // Initialize useRouter
-    let uniqueTypes: string[] = [];
+
+    //sort card sets by type, hero sets display first
+    let heroSets: CardSet[] = [];
+    let otherSets: CardSet[] = [];
+
     cardSets.forEach(set => {
-        !uniqueTypes.includes(set.Type) && uniqueTypes.push(set.Type);
+        if (set.Type.includes("Hero")) {
+            heroSets.push(set);
+        } else {
+            otherSets.push(set);
+        }
     });
 
+    let sortedSets = [...heroSets, ...otherSets];
+
+    let uniqueTypes: string[] = [];
+    sortedSets.forEach(set => {
+        if (!uniqueTypes.includes(set.Type)) {
+            uniqueTypes.push(set.Type);
+        }
+    });
+
+
     const handleClick = (Id: string) => {
-        router.push(`/si/${Id}`);
+        router.push(`/cards/si/${Id}`);
     };
 
     cardSets.sort((a, b) => a.Name.localeCompare(b.Name));
