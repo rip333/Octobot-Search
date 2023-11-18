@@ -1,7 +1,6 @@
 /* Results.css */
 .resultsContainer {
-  padding: 1rem;
-  margin: 1rem;
+  padding: 0rem 1rem;
   background-color: inherit;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: black;
@@ -18,4 +17,13 @@
 .NoResults img {
   width: 10%;
   filter: grayscale(50%);
+}
+
+.activeFilter {
+  border-color: white;
+  border-style: ridge;
+}
+
+.inactiveFilter {
+  background-color: grey;
 }
