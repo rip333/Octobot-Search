@@ -28,7 +28,7 @@ const CardDisplay: React.FC<CardProps> = ({ card }) => {
                 <h2>{card.Name} {card.Subname && "- " + card.Subname}</h2>
                 <p>Classification: {card.Classification}</p>
                 <p>Type: {card.Type}</p>
-                {card.Traits.length > 0 && (
+                {card.Traits && card.Traits.length > 0 && (
                     <div>
                         <p>Traits:</p>
                         <ul>
