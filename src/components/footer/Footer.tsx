@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
         <footer className={styles.footer}>
             <ul className={styles.links}>
                 <li className={styles.linkItem}>
-                    <a href="https://github.com/rip333/Octobot-Search-Ui" className={styles.link}>
+                    <a href="https://github.com/rip333/Octobot-Search" className={styles.link}>
                         Github
                     </a>
                 </li>
