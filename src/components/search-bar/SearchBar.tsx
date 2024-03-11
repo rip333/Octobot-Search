@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './SearchBar.module.css'; // Import the CSS Module
 import { useRouter } from 'next/router';
 import { handleSearch } from '@/searchUtils';
@@ -11,11 +11,18 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
     const [searchText, setSearchText] = useState('');
     const router = useRouter();
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Update searchText when the router query changes
     useEffect(() => {
         if (router.query.query && typeof router.query.query === 'string') {
             setSearchText(router.query.query);
+        }
+
+        // Autofocus logic for non-mobile devices
+        const isNonMobile = window.innerWidth > 768; // Example breakpoint for mobile devices
+        if (isNonMobile && inputRef.current) {
+            inputRef.current.focus();
         }
     }, [router.query.query]);
 
@@ -33,7 +40,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
                         placeholder="Search"
                         type="search"
                         value={searchText}
-                        autoFocus required
+                        ref={inputRef}
+                        required
                         onChange={(e) => setSearchText(e.target.value)}
                     />
                 </div>
