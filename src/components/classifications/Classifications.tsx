@@ -7,6 +7,7 @@ const c12ns = [
 {name: "Justice", color: "yellow"},
 {name: "Leadership", color: "blue"},
 {name: "Protection", color: "green"},
+{name: "Pool", color: "pink"},
 {name: "Basic", color: "grey"},
 {name: "Hero", color: "white"},
 {name: "Encounter", color: "purple"}

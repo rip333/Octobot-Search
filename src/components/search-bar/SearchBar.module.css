@@ -1,3 +1,7 @@
+.search {
+  min-width: 60%;
+}
+
 .searchContainer {
   display: flex;
   width: 100%;
@@ -8,8 +12,7 @@
 .searchbox input{
   padding-block: 20px;
   padding-inline: 10px;
-  min-width: 500px;
-  width: 40%;
+  min-width: 100%;
   font-size: 24px;
 }
 
@@ -19,8 +22,6 @@
   color: white;
   padding: 12px 32px;
   text-align: center;
-  width: 250px;
-  height: 54px;
   text-decoration: none;
   font-size: 24px;
   display: block;

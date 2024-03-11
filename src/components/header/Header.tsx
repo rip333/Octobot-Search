@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './Header.module.css'; // Import the CSS Module
 import SearchBar from '../search-bar/SearchBar';
 import logo from '../../logo.png';
+import mobileLogo from "../../icon-text.png";
 import FilterOptions from '../filters/FilterOptions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,6 +17,9 @@ const Header: React.FC = ({ }) => {
     <div className={styles.OctobotHeader}>
       <Link href="/">
         <Image src={logo} className={styles.OctobotLogo} alt="logo" />
+      </Link>
+      <Link href="/">
+        <Image src={mobileLogo} className={styles.OctobotMobileLogo} alt="logo" />
       </Link>
       <SearchBar origin={origin} incomplete={incomplete} />
       <FilterOptions

@@ -17,4 +17,34 @@
   color: #61dafb;
 }
 
-.OctobotLogo {}
+.OctobotLogo {
+  max-width: 100%;
+  height: auto;
+}
+
+.OctobotMobileLogo {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .OctobotHeader {
+    padding: 10px; /* Reduce padding on smaller screens */
+  }
+
+  .OctobotLogo {
+    display:none;
+  }  
+
+  .OctobotMobileLogo {
+    height: auto;
+    max-width: 100%;
+    display: flex;
+  }
+
+  /* You might need to adjust other elements for better mobile presentation */
+  /* For example, if your SearchBar has specific width set somewhere, adjust it here */
+  .SearchBarClassName {
+    width: 100%; /* Example: make the search bar full width on smaller screens */
+  }
+}

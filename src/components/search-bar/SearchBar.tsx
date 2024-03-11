@@ -25,7 +25,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ incomplete, origin }) => {
     };
 
     return (
-        <div>
+        <div className={styles.search}>
             <form onSubmit={handleForm} className={styles.form}>
                 <div className={styles.searchbox}>
                     <input
