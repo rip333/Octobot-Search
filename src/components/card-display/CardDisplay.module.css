@@ -20,3 +20,23 @@
 .championsIcon {
     font-family: 'ChampionsIcons';
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cardDisplay {
+        flex-direction: column;
+        align-items: center; /* Adjust alignment as needed */
+    }
+
+    .leftContent {
+        text-align: center; /* Adjust text alignment for mobile */
+        flex: none; /* Reset flex to allow natural content width or set specific width as needed */
+        width: 100%; /* Make left content full width */
+    }
+    
+    .rightContent {
+        flex: none; /* Reset flex to allow natural content width or set specific width as needed */
+        width: 100%; /* Make right content full width */
+        padding: 12px 0; /* Adjust padding as needed */
+    }
+}
