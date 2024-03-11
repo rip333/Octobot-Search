@@ -32,7 +32,7 @@ const Page: React.FC = () => {
     if (card) {
         return (
             <div>
-                <Header />
+                <Header miniLogo={true} />
                 <CardDisplay card={card} />
                 <Footer />
             </div>
