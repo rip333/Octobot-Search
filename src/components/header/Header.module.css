@@ -22,12 +22,29 @@
   height: auto;
 }
 
+.OctobotMiniLogo {
+  height: auto;
+  width: 30%;
+  max-width: 400px;
+}
+
+.OctobotMiniLogo img{
+  height: auto;
+  width: 100%;
+}
+
 .OctobotMobileLogo {
   display: none;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+
+  .OctobotMiniLogo {
+    height: auto;
+    width: 50%;
+  }
+  
   .OctobotHeader {
     padding: 10px; /* Reduce padding on smaller screens */
   }

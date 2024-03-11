@@ -36,7 +36,7 @@ const Search: React.FC = () => {
 
     return (
         <div>
-            <Header />
+            <Header miniLogo={true} />
             <Results results={searchResults} loading={loading} />
         </div>
     );

@@ -32,7 +32,7 @@ const Page: React.FC = () => {
 
     return (
         <div>
-            <Header />
+            <Header miniLogo={cards && !loading} />
             <Results results={cards} loading={loading} />
             <Footer />
         </div>

@@ -38,7 +38,7 @@ const Home: React.FC = () => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <Header />
+      <Header miniLogo={false} />
       <div style={{ width: "90%", display: "inline-block" }}>
         <CardSets cardSets={sets} />
         <CardPacks cardPacks={packs} />
