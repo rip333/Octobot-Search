@@ -1,9 +1,15 @@
 // pages/_app.js or pages/_app.tsx
 import '../globals.css';
 import type { AppProps } from 'next/app';
+import { Analytics } from '@vercel/analytics/react';
 
 function MyApp({ Component, pageProps }: AppProps) {
-    return <Component {...pageProps} />
+    return (
+        <>
+            <Component {...pageProps} />
+            <Analytics />
+        </>
+    );
 }
 
 export default MyApp;

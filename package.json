@@ -10,6 +10,7 @@
     "export": "next export"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.2.2",
     "axios": "^1.6.1",
     "loadable-image": "^3.0.6",
     "next": "14.0.2",
