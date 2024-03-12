@@ -11,11 +11,30 @@ interface ResultsProps {
 
 const Results: React.FC<ResultsProps> = ({ results, loading }) => {
     const [showEncounter, setShowEncounter] = useState<boolean | null>(null);
-    // Filtered results based on the toggle state
+
     const filteredResults = results.filter(card => {
-        if (showEncounter === null) return true; // Show all if no filter is selected
+        if (showEncounter === null) return true; 
         return showEncounter ? card.Classification === "Encounter" : card.Classification !== "Encounter";
+    }).sort((a, b) => {
+        const regex = /^(\d+)([A-Za-z]?)$/;
+    
+        const matchA = a.Id.match(regex);
+        const matchB = b.Id.match(regex);
+    
+        if (!matchA || !matchB) {
+            return a.Id.localeCompare(b.Id);
+        }
+    
+        const numA = parseInt(matchA[1], 10);
+        const numB = parseInt(matchB[1], 10);
+    
+        if (numA !== numB) {
+            return numA - numB;
+        }
+    
+        return matchA[2].localeCompare(matchB[2]);
     });
+    
 
 
     if (results.length > 0 || loading) {

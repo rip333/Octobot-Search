@@ -1,6 +1,5 @@
 /* Results.css */
 .resultsContainer {
-  padding: 0rem 1rem;
   background-color: inherit;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: black;
@@ -26,4 +25,8 @@
 
 .inactiveFilter {
   background-color: grey;
+}
+
+.resultsList {
+  padding: 0px;
 }
