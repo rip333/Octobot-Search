@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from "./CardSets.module.css";
-import { useRouter } from 'next/router'; // Import useRouter
+import Link from 'next/link'; // Import Link from next/link
 import { CardSet } from "../../models/CardSet";
 
 interface CardSetsProps {
@@ -8,9 +8,7 @@ interface CardSetsProps {
 }
 
 const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
-    const router = useRouter(); // Initialize useRouter
-
-    //sort card sets by type, hero sets display first
+    // Sort card sets by type, hero sets display first
     let heroSets: CardSet[] = [];
     let otherSets: CardSet[] = [];
 
@@ -31,11 +29,6 @@ const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
         }
     });
 
-
-    const handleClick = (Id: string) => {
-        router.push(`/cards/si/${Id}`);
-    };
-
     cardSets.sort((a, b) => a.Name.localeCompare(b.Name));
 
     return (
@@ -44,13 +37,9 @@ const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
                 <div key={type}>
                     <h3>{type}</h3>
                     {cardSets.filter(set => set.Type === type).map(filteredSet => (
-                        <button
-                            className={styles.setButton}
-                            key={filteredSet.Id}
-                            onClick={() => handleClick(filteredSet.Id)}
-                        >
+                        <Link href={`/cards/si/${filteredSet.Id}`} key={filteredSet.Id} passHref className={styles.setButton} role="button">
                             {filteredSet.Name}
-                        </button>
+                        </Link>
                     ))}
                 </div>
             ))}

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from "./Classifications.module.css";
-import { useRouter } from 'next/router'; // Import useRouter
+import Link from 'next/link'; // Import Link
 
 const c12ns = [
 {name: "Aggression", color: "red"},
@@ -14,19 +14,13 @@ const c12ns = [
 ]
 
 const Classifications: React.FC = () => {
-    const router = useRouter(); // Initialize useRouter
-
-    const handleClick = (Id: string) => {
-        router.push(`/cards/cl/${Id}`);
-    };
-
     return (
         <div className={styles.classifications}>
             <h3>Classifications</h3>
             {c12ns.map(cl => (
-                <button className={styles.classificationsButton} key={cl.name} onClick={() => handleClick(cl.name)}>
+                <Link href={`/cards/cl/${cl.name}`} key={cl.name} passHref className={styles.classificationsButton} style={{ borderColor: cl.color }}>
                     {cl.name}
-                </button>
+                </Link>
             ))}
         </div>
     );

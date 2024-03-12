@@ -5,6 +5,25 @@
     text-align: center;
 }
 
+.setButton {
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 6px;
+    border-radius: 5px;
+    font-family: 'AvenirNextLtPro';
+    background-color: #ed1d2479;
+    cursor: pointer;
+}
+
+.setButton:hover {
+    background-color: #ed1d24;
+}
+
 @media (max-width: 768px) {
     .cardSets {
         max-width: 100%;

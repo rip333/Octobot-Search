@@ -4,3 +4,22 @@
     margin-inline: 20px;
     text-align: center;
 }
+
+.classificationsButton {
+    color: white;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 6px;
+    border-radius: 5px;
+    font-family: 'AvenirNextLtPro';
+    background-color: #ed1d2479;
+    cursor: pointer;
+    border-style: solid;
+}
+
+.classificationsButton:hover {
+    background-color: #ed1d24;
+}
