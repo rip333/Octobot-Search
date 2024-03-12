@@ -22,6 +22,7 @@ button {
     border-radius: 5px;
     font-family: 'AvenirNextLtPro';
     background-color: #ed1d2479;
+    cursor: pointer;
 }
 
 button:hover {
