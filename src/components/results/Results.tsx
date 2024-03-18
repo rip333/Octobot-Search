@@ -65,7 +65,7 @@ const Results: React.FC<ResultsProps> = ({ results, loading }) => {
     return (
         <div className={styles.resultsContainer}>
             <div className={styles.filterButtons}>
-                {uniqueClassifications.map(classification => (
+                {uniqueClassifications.length > 1 && uniqueClassifications.map(classification => (
                     <button
                         key={classification}
                         className={activeClassifications.includes(classification) ? styles.activeFilter : styles.inactiveFilter}
@@ -76,7 +76,7 @@ const Results: React.FC<ResultsProps> = ({ results, loading }) => {
                 ))}
             </div>
             <div className={styles.filterButtons}>
-                {uniqueTypes.map(type => (
+                {uniqueTypes.length > 1 && uniqueTypes.map(type => (
                     <button
                         key={type}
                         className={activeTypes.includes(type) ? styles.activeFilter : styles.inactiveFilter}
