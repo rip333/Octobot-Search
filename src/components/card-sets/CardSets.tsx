@@ -29,6 +29,12 @@ const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
         }
     });
 
+    // Define the custom order
+    const typeOrder = ["Hero Set", "Villain Set", "Modular Set", "Nemesis Set", "Campaign Set", "Supplementary Set"];
+
+    // Sort uniqueTypes based on the predefined order
+    uniqueTypes.sort((a, b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
+
     cardSets.sort((a, b) => a.Name.localeCompare(b.Name));
 
     return (
