@@ -53,7 +53,7 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params
   const { filter, type } = params!;
 
   try {
-    const cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(${filter}:"${type}")&origin:"official"`);
+    const cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(${filter}:"${type}"%26o:"true")`);
     return {
       props: {
         cards,
