@@ -7,6 +7,7 @@ import Classifications from "@/components/classifications/Classifications";
 import Footer from "@/components/footer/Footer";
 import { CardSet } from "../models/CardSet";
 import { CardPack } from "../models/CardPack";
+import CardTypes from '@/components/card-types/CardTypes';
 
 // Fetcher function to fetch data from API
 const fetcher = async (url: string) => {
@@ -35,6 +36,7 @@ const Home: React.FC<{ sets: CardSet[], packs: CardPack[], setsError: boolean, p
             <CardSets cardSets={sets} />
             <CardPacks cardPacks={packs} />
             <Classifications />
+            <CardTypes />
           </>
         )}
         <Footer />
