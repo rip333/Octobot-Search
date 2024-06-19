@@ -19,7 +19,7 @@ const fetcher = async (url: string) => {
 const Page: React.FC<PageProps> = ({ card, error }) => {
   if (error) {
     console.error('Error fetching card');
-    return <div>Error loading the card.</div>; // Adjust error handling as needed
+    return <div>Error loading the card.</div>; 
   }
 
   if (!card) {
@@ -42,8 +42,7 @@ const Page: React.FC<PageProps> = ({ card, error }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Fetch or define the list of paths to be pre-rendered
-  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards'); // Adjust the endpoint as needed
+  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards'); 
   const cards: Card[] = res.data;
 
   const paths = cards.map(card => ({
@@ -52,7 +51,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: 'blocking', // Enable blocking fallback for dynamic routes
+    fallback: 'blocking', 
   };
 };
 
@@ -61,7 +60,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 
   try {
     const data = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${id}"%26o:"true")`);
-    const card = data ? data[0] : null;
+    const card = data && data.length > 0 ? data[0] : null;
 
     return {
       props: {
