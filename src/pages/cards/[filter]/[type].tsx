@@ -1,36 +1,78 @@
-import { useRouter } from 'next/router';
-import useSWR from 'swr';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import axios from "axios";
 import { Card } from "@/models/Card";
 import Results from "@/components/results/Results";
 import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
+import { ParsedUrlQuery } from 'querystring';
 
-const fetcher = (url: string) => axios.get(url).then(res => res.data);
-
-const Page: React.FC = () => {
-    const router = useRouter();
-
-    const queryURL = router.isReady ? `https://cerebro-beta-bot.herokuapp.com/query?input=(${router.query.filter}:"${router.query.type}")&origin:"official"` : null;
-
-    // Use SWR for data fetching
-    const { data: cards, error, isValidating } = useSWR<Card[]>(queryURL, fetcher, {
-        revalidateOnFocus: false, 
-    });
-
-    const loading = !cards && isValidating;
-
-    if (error) {
-        console.error('Error fetching cards:', error);
-    }
-
-    return (
-        <div>
-            <Header miniLogo={true} />
-            <Results results={cards || []} loading={loading} />
-            <Footer />
-        </div>
-    );
+const fetcher = async (url: string) => {
+  const res = await axios.get(url);
+  return res.data;
 };
+
+interface PageProps {
+  cards: Card[];
+  loading: boolean;
+  error: boolean;
+}
+
+interface Params extends ParsedUrlQuery {
+  filter: string;
+  type: string;
+}
+
+const Page: React.FC<PageProps> = ({ cards, loading, error }) => {
+  if (error) {
+    console.error('Error fetching cards');
+  }
+
+  return (
+    <div>
+      <Header miniLogo={true} />
+      <Results results={cards || []} loading={loading} />
+      <Footer />
+    </div>
+  );
+};
+
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
+  // Define paths for pre-rendering
+  const paths = [
+    { params: { filter: 'exampleFilter1', type: 'exampleType1' } },
+    { params: { filter: 'exampleFilter2', type: 'exampleType2' } },
+  ];
+
+  return {
+    paths,
+    fallback: 'blocking', // Enable blocking fallback for dynamic routes
+  };
+};
+
+export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
+  const { filter, type } = params!;
+
+  try {
+    const cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(${filter}:"${type}")&origin:"official"`);
+    return {
+      props: {
+        cards,
+        loading: false,
+        error: false,
+      },
+      revalidate: 604800, // Revalidate every week
+    };
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return {
+      props: {
+        cards: [],
+        loading: false,
+        error: true,
+      },
+      revalidate: 604800, // Revalidate every week
+    };
+  }
+}
 
 export default Page;

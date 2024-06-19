@@ -1,7 +1,7 @@
 // CardImage.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../../models/Card';
-import { AsyncImage } from 'loadable-image'
+import { AsyncImage } from 'loadable-image';
 import styles from './CardImage.module.css';
 
 interface CardImageProps {
@@ -9,6 +9,25 @@ interface CardImageProps {
 }
 
 const CardImage: React.FC<CardImageProps> = ({ card }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener for resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const getImageUrl = (card: Card): string => {
     const imageBaseUrl = "https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/";
     return card.Official
@@ -16,8 +35,6 @@ const CardImage: React.FC<CardImageProps> = ({ card }) => {
       : `${imageBaseUrl}unofficial/${card.Id}.jpg`;
   };
 
-  // Basic mobile detection
-  const isMobile = window.innerWidth <= 768; // Assuming 'mobile' is any screen width 768px or less
   let style = { width: 365, height: 515 }; // Default style
 
   if (card.Type.includes("Scheme")) {

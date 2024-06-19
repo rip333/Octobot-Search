@@ -1,51 +1,86 @@
 import React from 'react';
-import Header from "@/components/header/Header";
-import { useRouter } from 'next/router';
-import useSWR from 'swr';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import axios from "axios";
 import { Card } from "@/models/Card";
+import Header from "@/components/header/Header";
 import CardDisplay from "@/components/card-display/CardDisplay";
 import Footer from "@/components/footer/Footer";
 
-const fetcher = (url: string) => axios.get(url).then(res => res.data);
+interface PageProps {
+  card: Card | null;
+  error: boolean;
+}
 
-const Page: React.FC = () => {
-    const router = useRouter();
+const fetcher = async (url: string) => {
+  const res = await axios.get(url);
+  return res.data;
+};
 
-    // Construct the URL based on the router's query parameters
-    const queryURL = router.isReady ? `https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${router.query.id}"%26o:"true")` : null;
+const Page: React.FC<PageProps> = ({ card, error }) => {
+  if (error) {
+    console.error('Error fetching card');
+    return <div>Error loading the card.</div>; // Adjust error handling as needed
+  }
 
-    // Use SWR for data fetching
-    const { data, error } = useSWR<Card[]>(queryURL, fetcher, {
-        revalidateOnFocus: false, // Optionally, disable or enable automatic revalidation when window gains focus
-    });
-
-    // Select the first card from the data array if data is available
-    const card = data ? data[0] : undefined;
-
-    // Render loading state if data is not yet available or an error occurred
-    if (error) {
-        console.error('Error fetching card:', error);
-        return <div>Error loading the card.</div>; // Adjust error handling as needed
-    }
-
-    if (!card) {
-        return (
-            <div>
-                <Header miniLogo={true} />
-                <div>Loading...</div>
-                <Footer />
-            </div>
-        );
-    }
-
+  if (!card) {
     return (
-        <div>
-            <Header miniLogo={true} />
-            <CardDisplay card={card} />
-            <Footer />
-        </div>
+      <div>
+        <Header miniLogo={true} />
+        <div>Loading...</div>
+        <Footer />
+      </div>
     );
+  }
+
+  return (
+    <div>
+      <Header miniLogo={true} />
+      <CardDisplay card={card} />
+      <Footer />
+    </div>
+  );
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Fetch or define the list of paths to be pre-rendered
+  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards'); // Adjust the endpoint as needed
+  const cards: Card[] = res.data;
+
+  const paths = cards.map(card => ({
+    params: { id: card.Id.toString() }
+  }));
+
+  return {
+    paths,
+    fallback: 'blocking', // Enable blocking fallback for dynamic routes
+  };
+};
+
+export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
+  const { id } = params!;
+
+  try {
+    const data = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${id}"%26o:"true")`);
+    const card = data ? data[0] : null;
+
+    return {
+      props: {
+        card,
+        error: false,
+      },
+      revalidate: 604800, // Revalidate every week
+    };
+  } catch (error) {
+    console.error('Error fetching card:', error);
+
+    return {
+      props: {
+        card: null,
+        error: true,
+      },
+      revalidate: 604800, // Revalidate every week
+    };
+  }
 };
 
 export default Page;

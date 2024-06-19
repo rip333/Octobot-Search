@@ -1,7 +1,5 @@
 import React from 'react';
 import Header from "@/components/header/Header";
-import HeroSelect from "@/components/hero-select/HeroSelect";
-import useSWR from 'swr';
 import axios from "axios";
 import CardSets from "@/components/card-sets/CardSets";
 import CardPacks from "@/components/card-packs/CardPacks";
@@ -10,16 +8,13 @@ import Footer from "@/components/footer/Footer";
 import { CardSet } from "../models/CardSet";
 import { CardPack } from "../models/CardPack";
 
-// Axios fetcher function
-const fetcher = (url: string) => axios.get(url).then(res => res.data);
+// Fetcher function to fetch data from API
+const fetcher = async (url: string) => {
+  const res = await axios.get(url);
+  return res.data;
+};
 
-const Home: React.FC = () => {
-  // SWR hook to fetch card sets
-  const { data: sets, error: setsError } = useSWR<CardSet[]>(`https://cerebro-beta-bot.herokuapp.com/sets?official=true`, fetcher);
-
-  // SWR hook to fetch card packs
-  const { data: packs, error: packsError } = useSWR<CardPack[]>(`https://cerebro-beta-bot.herokuapp.com/packs?official=true`, fetcher);
-
+const Home: React.FC<{ sets: CardSet[], packs: CardPack[], setsError: boolean, packsError: boolean }> = ({ sets, packs, setsError, packsError }) => {
   // Loading state
   const loading = !sets || !packs;
 
@@ -47,5 +42,36 @@ const Home: React.FC = () => {
     </div>
   );
 };
+
+export async function getStaticProps() {
+  try {
+    const [sets, packs] = await Promise.all([
+      fetcher('https://cerebro-beta-bot.herokuapp.com/sets?official=true'),
+      fetcher('https://cerebro-beta-bot.herokuapp.com/packs?official=true')
+    ]);
+
+    return {
+      props: {
+        sets,
+        packs,
+        setsError: false,
+        packsError: false,
+      },
+      revalidate: 604800,
+    };
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return {
+      props: {
+        sets: [],
+        packs: [],
+        setsError: true,
+        packsError: true,
+      },
+      revalidate: 60, // Revalidate every 60 seconds (adjust as needed)
+    };
+  }
+}
+
 
 export default Home;
