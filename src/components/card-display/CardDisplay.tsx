@@ -8,7 +8,6 @@ interface CardProps {
 }
 
 const CardDisplay: React.FC<CardProps> = ({ card }) => {
-
     const [activePrinting, setActivePrinting] = useState<number>(0);
 
     const applyCustomFontToBrackets = (text: string): JSX.Element[] => {
@@ -26,12 +25,12 @@ const CardDisplay: React.FC<CardProps> = ({ card }) => {
     };
 
     const uniquePrintings = card.Printings.filter(printing => printing.UniqueArt);
-    let multiplePrintings = uniquePrintings.length > 1;
-    var flavor = "";
-    var packNumber = "";
+    const multiplePrintings = uniquePrintings.length > 1;
+    let flavor = "";
+    let packNumber = "";
 
     if (uniquePrintings.length > 0) {
-        let printing = uniquePrintings[activePrinting];
+        const printing = uniquePrintings[activePrinting];
         flavor = printing.Flavor ?? "";
         packNumber = printing.PackNumber;
     }
@@ -67,7 +66,7 @@ const CardDisplay: React.FC<CardProps> = ({ card }) => {
                     )}
                     {card.Rules && <p>Rules: {applyCustomFontToBrackets(card.Rules)}</p>}
                     <p>Pack Number: {packNumber}</p>
-                    {flavor != "" && (<p>Flavor: {flavor}</p>)}
+                    {flavor !== "" && (<p>Flavor: {flavor}</p>)}
                 </div>
             </div>
         </div>

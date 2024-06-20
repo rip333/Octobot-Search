@@ -10,6 +10,7 @@ interface CardImageProps {
 
 const CardImage: React.FC<CardImageProps> = ({ card, artificialId }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number, height: number }>({ width: 365, height: 515 });
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,16 +33,18 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId }) => {
       : `${imageBaseUrl}unofficial/${id}.jpg`;
   };
 
-  const getStyle = (): { width: number, height: number } => {
-    if (card.Id === "42001C") {
-      return { width: 715, height: 515 };
-    }
+  const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = event.currentTarget;
     if (card.Type.includes("Scheme")) {
-      return isMobile
-        ? { width: 365, height: 259 }
-        : { width: 515, height: 365 };
+      const schemeHeight = isMobile ? 259 : 365;
+      const schemeWidth = isMobile ? 365 : 515;
+      setImageDimensions({ width: schemeWidth, height: schemeHeight });
+    } else {
+      const newHeight = 515;
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      const newWidth = newHeight * aspectRatio;
+      setImageDimensions({ width: newWidth, height: newHeight });
     }
-    return { width: 365, height: 515 };
   };
 
   return (
@@ -49,7 +52,8 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId }) => {
       <AsyncImage
         src={getImageUrl()}
         alt={card.Name}
-        style={getStyle()}
+        onLoad={handleImageLoad}
+        style={{ width: imageDimensions.width, height: imageDimensions.height }}
       />
     </div>
   );
