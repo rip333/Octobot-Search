@@ -70,7 +70,7 @@ export async function getStaticProps() {
         setsError: true,
         packsError: true,
       },
-      revalidate: 60, // Revalidate every 60 seconds (adjust as needed)
+      revalidate: 604800,
     };
   }
 }
