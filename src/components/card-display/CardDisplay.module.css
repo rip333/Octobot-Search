@@ -21,22 +21,38 @@
     font-family: 'ChampionsIcons';
 }
 
-/* Responsive adjustments */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    width: 100%;
+    color: white;
+}
+
+.tab:hover {
+    background-color: #e66b6b;
+}
+
+.activeTab {
+    font-weight: bold;
+    border-style: solid;
+}
+
 @media (max-width: 768px) {
     .cardDisplay {
         flex-direction: column;
-        align-items: center; /* Adjust alignment as needed */
+        align-items: center; 
     }
 
     .leftContent {
-        text-align: center; /* Adjust text alignment for mobile */
-        flex: none; /* Reset flex to allow natural content width or set specific width as needed */
-        width: 100%; /* Make left content full width */
+        text-align: center; 
+        flex: none; 
+        width: 100%; 
     }
-    
+
     .rightContent {
-        flex: none; /* Reset flex to allow natural content width or set specific width as needed */
-        width: 100%; /* Make right content full width */
-        padding: 12px 0; /* Adjust padding as needed */
+        flex: none; 
+        width: 100%; 
+        padding: 12px 0; 
     }
 }

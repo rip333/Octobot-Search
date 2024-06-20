@@ -26,4 +26,5 @@ interface Printing {
   Flavor?: string;
   SetNumber: string;
   SetId: string;
+  UniqueArt: boolean;
 }
