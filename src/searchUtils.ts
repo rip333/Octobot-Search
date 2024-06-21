@@ -9,7 +9,7 @@ const searchParameters = [
     'tr'
 ];
 
-export const createSearchQuery = (searchString: string, filterOptions: { incomplete: boolean; origin: string }) => {
+export const createSearchQuery = (searchString: string, filterOptions: { origin: string }) => {
     // Use a regular expression to match phrases inside quotes or single words
     const regex = /"[^"]+"|\S+/g;
     const tokens = [];
@@ -32,9 +32,6 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
     
     // Add the filter options to the query
     const filterQueries = [];
-    if (!filterOptions.incomplete) {
-        filterQueries.push(`i:"false"`);
-    }
     if (filterOptions.origin !== "all") {
         filterQueries.push(`o:"${filterOptions.origin === "official"}"`);
     }
@@ -43,6 +40,6 @@ export const createSearchQuery = (searchString: string, filterOptions: { incompl
     return `input=(${combinedQuery})${filterQueries.length > 0 ? '%26' + filterQueries.join('%26') : ''}`;
 };
 
-export const handleSearch = async (query: string, router: NextRouter, incomplete?: boolean, origin?: string) => {    
-    router.push(`/search?query=${encodeURIComponent(query)}&incomplete=${incomplete}&origin=${origin}`);
+export const handleSearch = async (query: string, router: NextRouter, origin?: string) => {    
+    router.push(`/search?query=${encodeURIComponent(query)}&incomplete=true&origin=${origin}`);
 };

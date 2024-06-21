@@ -3,25 +3,13 @@ import styles from './FilterOptions.module.css';
 import React from 'react';
 
 interface FilterOptionsProps {
-    incomplete: boolean;
-    setIncomplete: React.Dispatch<React.SetStateAction<boolean>>;
     origin: string;
     setOrigin: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const FilterOptions: React.FC<FilterOptionsProps> = ({ incomplete, setIncomplete, origin, setOrigin }) => {
+const FilterOptions: React.FC<FilterOptionsProps> = ({ origin, setOrigin }) => {
     return (
         <div className={styles.container}>
-            <div className={styles.checkboxContainer}>
-                <label title={"Differentiate between products that have been officially released and those that have yet to be officially released"}>
-                    <input
-                        type="checkbox"
-                        checked={incomplete}
-                        onChange={e => setIncomplete(e.target.checked)}
-                    />
-                    <span className={styles.labelText}>Incomplete</span>
-                </label>
-            </div>|&nbsp;&nbsp;
             <div className={styles.radioContainer}>
                 Origin:
                 <label>

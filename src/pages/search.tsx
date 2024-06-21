@@ -18,7 +18,7 @@ const Search: React.FC = () => {
 
             if (router.query.query) {
                 try {
-                    let searchQuery = createSearchQuery(router.query.query as string, { incomplete: router.query.incomplete === "true", origin: router.query.origin as string })
+                    let searchQuery = createSearchQuery(router.query.query as string, { origin: router.query.origin as string })
                     let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?${searchQuery}`);
                     setSearchResults(results?.data.reverse());
                     setLoading(false);

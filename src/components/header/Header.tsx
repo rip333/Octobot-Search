@@ -12,7 +12,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ miniLogo }) => {
-  const [incomplete, setIncomplete] = useState(false);
   const [origin, setOrigin] = useState('official');
 
   return (
@@ -31,10 +30,8 @@ const Header: React.FC<HeaderProps> = ({ miniLogo }) => {
           </Link>
         </>
       }
-      <SearchBar origin={origin} incomplete={incomplete} />
+      <SearchBar origin={origin} />
       <FilterOptions
-        incomplete={incomplete}
-        setIncomplete={setIncomplete}
         origin={origin}
         setOrigin={setOrigin}
       />
