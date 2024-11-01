@@ -59,7 +59,7 @@ export async function getStaticProps() {
         setsError: false,
         packsError: false,
       },
-      revalidate: 604800,
+      revalidate: 3000,
     };
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -70,7 +70,7 @@ export async function getStaticProps() {
         setsError: true,
         packsError: true,
       },
-      revalidate: 604800,
+      revalidate: 3000,
     };
   }
 }
