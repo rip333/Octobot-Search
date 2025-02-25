@@ -6,10 +6,9 @@ import Link from 'next/link';
 
 interface ResultsProps {
     results: Array<Card>;
-    loading: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, loading }) => {
+const Results: React.FC<ResultsProps> = ({ results }) => {
     const [activeClassifications, setActiveClassifications] = useState<string[]>([]);
     const [activeTypes, setActiveTypes] = useState<string[]>([]);
 

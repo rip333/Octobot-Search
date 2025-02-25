@@ -6,6 +6,8 @@ import Results from '@/components/results/Results';
 import Header from '@/components/header/Header';
 import axios from "axios";
 import { createSearchQuery } from '@/searchUtils';
+import NoResults from '@/components/no-results/NoResults';
+import Loading from '@/components/loading/Loading';
 
 const Search: React.FC = () => {
     const router = useRouter();
@@ -37,7 +39,9 @@ const Search: React.FC = () => {
     return (
         <div>
             <Header miniLogo={true} />
-            <Results results={searchResults} loading={loading} />
+            {loading && <Loading />}
+            {!loading && <Results results={searchResults} />}
+            {searchResults.length === 0 && <NoResults/>}
         </div>
     );
 }
