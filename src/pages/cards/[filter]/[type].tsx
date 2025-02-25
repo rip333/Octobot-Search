@@ -5,6 +5,7 @@ import Results from "@/components/results/Results";
 import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
 import { ParsedUrlQuery } from 'querystring';
+import Loading from '@/components/loading/Loading';
 
 const fetcher = async (url: string) => {
   const res = await axios.get(url);
@@ -30,7 +31,8 @@ const Page: React.FC<PageProps> = ({ cards, loading, error }) => {
   return (
     <div>
       <Header miniLogo={true} />
-      <Results results={cards || []} loading={loading} />
+      {loading && <Loading />}
+      {!loading && <Results results={cards || []} />}
       <Footer />
     </div>
   );
