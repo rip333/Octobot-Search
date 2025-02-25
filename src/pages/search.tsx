@@ -41,7 +41,7 @@ const Search: React.FC = () => {
             <Header miniLogo={true} />
             {loading && <Loading />}
             {!loading && <Results results={searchResults} />}
-            {searchResults.length === 0 && <NoResults/>}
+            {searchResults.length === 0 && !loading && <NoResults/>}
         </div>
     );
 }
