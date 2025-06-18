@@ -10,7 +10,7 @@ var imageWidth = mmToPx(imgWidthMM);
 var imageHeight = mmToPx(imgHeightMM);
 
 // Grid positions (3 x 6 = 18)
-var xMM = [10.32, 105.49, 200.66];
+var xMM = [10.75, 105.75, 200.83];
 var yMM = [28.7, 95.25, 161.62, 228.17, 294.72, 361.1];
 
 var positions = [];
