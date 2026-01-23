@@ -22,7 +22,9 @@ export const createSearchQuery = (searchString: string, filterOptions: { origin:
     // Process each token
     const queryParts = tokens.map(token => {
         // Remove quotes for the current token if it's a phrase
-        const processedToken = token.replace(/"/g, '');
+        let processedToken = token.replace(/"/g, '');
+        // Remove special characters like hyphens, keeping only alphanumeric and spaces
+        processedToken = processedToken.replace(/[-]/g, '');
         const encodedToken = encodeURIComponent(processedToken);
         return searchParameters.map(param => `${param}:"${encodedToken}"`).join('|');
     });

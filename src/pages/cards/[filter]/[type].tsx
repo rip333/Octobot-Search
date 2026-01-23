@@ -16,6 +16,7 @@ interface PageProps {
   cards: Card[];
   loading: boolean;
   error: boolean;
+  cerebroQuery?: string;
 }
 
 interface Params extends ParsedUrlQuery {
@@ -23,7 +24,7 @@ interface Params extends ParsedUrlQuery {
   type: string;
 }
 
-const Page: React.FC<PageProps> = ({ cards, loading, error }) => {
+const Page: React.FC<PageProps> = ({ cards, loading, error, cerebroQuery }) => {
   if (error) {
     console.error('Error fetching cards');
   }
@@ -32,7 +33,7 @@ const Page: React.FC<PageProps> = ({ cards, loading, error }) => {
     <div>
       <Header miniLogo={true} />
       {loading && <Loading />}
-      {!loading && <Results results={cards || []} />}
+      {!loading && <Results results={cards || []} cerebroQuery={cerebroQuery} />}
       <Footer />
     </div>
   );
@@ -53,14 +54,16 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
   const { filter, type } = params!;
+  const query = `input=(${filter}:"${type}"%26o:"true")`;
 
   try {
-    const cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(${filter}:"${type}"%26o:"true")`);
+    const cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
     return {
       props: {
         cards,
         loading: false,
         error: false,
+        cerebroQuery: query,
       },
       revalidate: 604800, // Revalidate every week
     };

@@ -8,11 +8,13 @@ import axios from "axios";
 import { createSearchQuery } from '@/searchUtils';
 import NoResults from '@/components/no-results/NoResults';
 import Loading from '@/components/loading/Loading';
+import Footer from '@/components/footer/Footer';
 
 const Search: React.FC = () => {
     const router = useRouter();
     const [searchResults, setSearchResults] = useState<Card[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [cerebroQuery, setCerebroQuery] = useState<string>('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,6 +23,7 @@ const Search: React.FC = () => {
             if (router.query.query) {
                 try {
                     let searchQuery = createSearchQuery(router.query.query as string, { origin: router.query.origin as string })
+                    setCerebroQuery(searchQuery);
                     let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?${searchQuery}`);
                     setSearchResults(results?.data.reverse());
                     setLoading(false);
@@ -40,8 +43,9 @@ const Search: React.FC = () => {
         <div>
             <Header miniLogo={true} />
             {loading && <Loading />}
-            {!loading && <Results results={searchResults} />}
+            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} />}
             {searchResults.length === 0 && !loading && <NoResults/>}
+            <Footer />
         </div>
     );
 }
