@@ -10,7 +10,7 @@ interface CardProps {
 const CardDisplay: React.FC<CardProps> = ({ card }) => {
     const [activePrinting, setActivePrinting] = useState<number>(0);
 
-    const applyCustomFontToBrackets = (text: string): JSX.Element[] => {
+    const applyCustomFontToBrackets = (text: string): React.ReactElement[] => {
         const regex = /\{([^}]+)\}/g;
         return text.split(regex).map((part, index) => {
             if (part.length === 1) {
