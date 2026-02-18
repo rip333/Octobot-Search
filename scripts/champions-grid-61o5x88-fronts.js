@@ -30,9 +30,63 @@ var sourceFolder = Folder.selectDialog("Select the folder containing PNG images 
 if (!sourceFolder) {
     alert("No folder selected.");
 } else {
-    var files = sourceFolder.getFiles("*.png");
+    // Collect all PNG files recursively (including subfolders)
+    function collectPngs(folder, outArray) {
+        var items = folder.getFiles();
+        for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            if (it instanceof File && /\.png$/i.test(it.name)) {
+                outArray.push(it);
+            } else if (it instanceof Folder) {
+                collectPngs(it, outArray);
+            }
+        }
+    }
+
+    // Natural (alpha-numeric) compare: 1,2,3,10 instead of 1,10,2
+    function compareAlphaNumeric(aName, bName) {
+        var a = aName.toLowerCase();
+        var b = bName.toLowerCase();
+
+        var re = /(\d+)|(\D+)/g;
+        var aParts = a.match(re);
+        var bParts = b.match(re);
+
+        var len = Math.min(aParts.length, bParts.length);
+        for (var i = 0; i < len; i++) {
+            var aa = aParts[i];
+            var bb = bParts[i];
+
+            // both numeric
+            if (/^\d+$/.test(aa) && /^\d+$/.test(bb)) {
+                var na = parseInt(aa, 10);
+                var nb = parseInt(bb, 10);
+                if (na < nb) return -1;
+                if (na > nb) return 1;
+            } else {
+                if (aa < bb) return -1;
+                if (aa > bb) return 1;
+            }
+        }
+
+        // If all compared equal so far, shorter wins
+        if (aParts.length < bParts.length) return -1;
+        if (aParts.length > bParts.length) return 1;
+        return 0;
+    }
+
+    var files = [];
+    collectPngs(sourceFolder, files);
+
+    // Sort primarily by folder path, then by filename using
+    // natural (alpha-numeric) order, so cards from the same
+    // subdirectory stay grouped and appear in a predictable order.
     files.sort(function (a, b) {
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), undefined, { numeric: true });
+        var dirA = a.parent.fsName.toLowerCase();
+        var dirB = b.parent.fsName.toLowerCase();
+        if (dirA < dirB) return -1;
+        if (dirA > dirB) return 1;
+        return compareAlphaNumeric(a.name, b.name);
     });
     if (files.length === 0) {
         alert("No PNG files found in selected folder.");
@@ -41,6 +95,10 @@ if (!sourceFolder) {
         if (!baseFile.exists) {
             alert("Base PSD not found.");
         } else {
+            // Optional: choose a backup/filler card used when a sheet
+            // has fewer than 18 images. Cancel to keep old repeat behavior.
+            var backupFile = File.openDialog("Select backup PNG to use as filler (Cancel to repeat cards instead)", "*.png");
+
             var outputFolder = new Folder(sourceFolder.fsName + "/print-files");
             if (!outputFolder.exists) outputFolder.create();
 
@@ -62,9 +120,14 @@ if (!sourceFolder) {
                     batchFiles.push(files[index]);
                 }
 
-                // Loop/repeat images to fill 18 if needed
+                // Fill remaining slots on the sheet up to 18 cards
                 while (batchFiles.length < 18) {
-                    batchFiles.push(files[batchFiles.length % files.length]);
+                    if (backupFile && backupFile.exists) {
+                        batchFiles.push(backupFile);
+                    } else {
+                        // Fallback: repeat cards from the main list
+                        batchFiles.push(files[batchFiles.length % files.length]);
+                    }
                 }
 
                 // Process each file
