@@ -9,10 +9,11 @@ import Image from 'next/image';
 
 interface HeaderProps {
   miniLogo: boolean;
+  origin?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ miniLogo }) => {
-  const [origin, setOrigin] = useState('official');
+const Header: React.FC<HeaderProps> = ({ miniLogo, origin }) => {
+  //   const [origin, setOrigin] = useState('official');
 
   return (
     <div className={styles.OctobotHeader}>
@@ -31,10 +32,6 @@ const Header: React.FC<HeaderProps> = ({ miniLogo }) => {
         </>
       }
       <SearchBar origin={origin} />
-      <FilterOptions
-        origin={origin}
-        setOrigin={setOrigin}
-      />
     </div>);
 };
 

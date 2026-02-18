@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link'; // Import Link from next/link
 import styles from "./CardPacks.module.css";
+import sharedStyles from "../../styles/Shared.module.css";
 import { CardPack } from '@/models/CardPack';
 
 interface CardPacksProps {
@@ -22,10 +23,10 @@ const CardPacks: React.FC<CardPacksProps> = ({ cardPacks }) => {
     });
 
     return (
-        <div className={styles.cardPacks}>
+        <div className={sharedStyles.sectionContainer}>
             <h3>Packs</h3>
             {sortedCardPacks.map(pack => (
-                <Link href={`/cards/pi/${pack.Id}`} key={pack.Id} passHref className={styles.packButton}>
+                <Link href={`/cards/pi/${pack.Id}`} key={pack.Id} passHref className={sharedStyles.redButton}>
                     {pack.Name}
                 </Link>
             ))}

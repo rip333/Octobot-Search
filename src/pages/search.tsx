@@ -37,14 +37,14 @@ const Search: React.FC = () => {
         };
 
         fetchData();
-    }, [router.query.query]);
+    }, [router.query.query, router.query.origin]);
 
     return (
         <div>
-            <Header miniLogo={true} />
+            <Header miniLogo={true} origin={router.query.origin as string} />
             {loading && <Loading />}
-            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} />}
-            {searchResults.length === 0 && !loading && <NoResults/>}
+            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} detailsEnabled={router.query.origin !== 'ms' && router.query.origin !== 'usi'} />}
+            {searchResults.length === 0 && !loading && <NoResults />}
             <Footer />
         </div>
     );

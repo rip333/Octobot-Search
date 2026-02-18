@@ -1,0 +1,40 @@
+.sectionContainer {
+    padding: 8px;
+    max-width: 100%;
+    margin-inline: 20px;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .sectionContainer {
+        max-width: 100%;
+        margin-inline: 1px;
+        padding: 1px;
+    }
+}
+
+.buttonGrid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 6px;
+}
+
+.redButton {
+    border: none;
+    color: white;
+    padding: 5px 8px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 6px;
+    border-radius: 5px;
+    font-family: 'AvenirNextLtPro';
+    background-color: #ed1d2479;
+    cursor: pointer;
+}
+
+.redButton:hover {
+    background-color: #ed1d24;
+}

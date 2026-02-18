@@ -26,6 +26,9 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId }) => {
   }, []);
 
   const getImageUrl = (): string => {
+    if (card.ImageUrl) {
+      return card.ImageUrl;
+    }
     const imageBaseUrl = "https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/";
     const id = artificialId || card.Id;
     return card.Official

@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './SearchBar.module.css'; // Import the CSS Module
 import { useRouter } from 'next/router';
 import { handleSearch } from '@/searchUtils';
+import Link from 'next/link';
 
 interface SearchBarProps {
     origin?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ origin }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ origin = "official" }) => {
     const [searchText, setSearchText] = useState('');
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +31,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ origin }) => {
         handleSearch(searchText, router, origin);
     };
 
+    const handleOriginChange = (newOrigin: string) => {
+        const { query } = router;
+        if (newOrigin === 'official') {
+            const { origin: _origin, ...rest } = query;
+            router.push({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+        } else {
+            router.push({ pathname: router.pathname, query: { ...query, origin: newOrigin } }, undefined, { shallow: true });
+        }
+    };
+
     return (
         <div className={styles.search}>
             <form onSubmit={handleForm} className={styles.form}>
@@ -45,6 +56,24 @@ const SearchBar: React.FC<SearchBarProps> = ({ origin }) => {
                     />
                 </div>
                 <div className={styles.searchContainer}>
+                    <div className={styles.toggleLayout}>
+                        <div className={styles.sourceToggle} role="group" aria-label="Card source">
+                            <button
+                                type="button"
+                                aria-pressed={origin === 'official'}
+                                onClick={() => handleOriginChange('official')}
+                            >
+                                ✔︎ Official
+                            </button>
+                            <button
+                                type="button"
+                                aria-pressed={origin === 'unofficial'}
+                                onClick={() => handleOriginChange('unofficial')}
+                            >
+                                ✦ Unofficial
+                            </button>
+                        </div>
+                    </div>
                     <button type="submit" className={styles.searchButton}>Search</button>
                 </div>
             </form>

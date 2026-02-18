@@ -1,34 +1,24 @@
-.cardSets {
-    padding: 8px;
-    max-width: 100%;
-    margin-inline: 20px;
-    text-align: center;
+/* cardSets, setButton handles by Shared.module.css */
+
+.categorySection {
+    margin-bottom: 40px;
 }
 
-.setButton {
-    border: none;
+.categorySection h2 {
+    border-bottom: 1px solid #ed1d24;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
     color: white;
-    padding: 5px 8px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 13px;
-    margin: 4px 6px;
-    border-radius: 5px;
-    font-family: 'AvenirNextLtPro';
-    background-color: #ed1d2479;
-    cursor: pointer;
 }
 
-.setButton:hover {
-    background-color: #ed1d24;
+.typeSection {
+    margin-bottom: 20px;
 }
 
-@media (max-width: 768px) {
-    .cardSets {
-        max-width: 100%;
-        margin-inline: 1px;
-        padding: 1px;
-        text-align: center;
-    }    
-  }
+/* setGrid handled by Shared.module.css */
+
+.packMetadata {
+    font-size: 11px;
+    color: #888;
+    margin-top: -2px;
+}

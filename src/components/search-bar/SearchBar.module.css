@@ -4,12 +4,16 @@
 
 .searchContainer {
   display: flex;
+  flex-direction: row;
   width: 100%;
   justify-content: center;
+  align-items: center;
   padding-block: 15px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.searchbox input{
+.searchbox input {
   padding-block: 20px;
   padding-inline: 10px;
   min-width: 100%;
@@ -30,4 +34,57 @@
 
 .searchButton:hover {
   font-weight: 600;
+}
+
+.toggleLayout {
+  display: flex;
+  justify-content: center;
+}
+
+.sourceToggle {
+  display: inline-flex;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  padding: 1px;
+  background: rgba(203, 203, 203, 0.622);
+  gap: 4px;
+}
+
+.sourceToggle button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.65);
+  transition: transform 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sourceToggle button[aria-pressed="true"] {
+  background: white;
+  color: rgba(0, 0, 0, 0.92);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10), 0 6px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.sourceToggle button:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .searchContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .searchButton {
+    width: 100%;
+    max-width: 300px;
+  }
 }

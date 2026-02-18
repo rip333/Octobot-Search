@@ -16,6 +16,9 @@ const Footer: React.FC = () => {
                         Cerebro
                     </a>
                 </li>
+                <li className={styles.linkItem}>
+                    Powered by: <a href="https://db.merlindumesnil.net/api/" className={styles.link}>db.merlindumesnil.net</a>
+                </li>
             </ul>
         </footer>
     );

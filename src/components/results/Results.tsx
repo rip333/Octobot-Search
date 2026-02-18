@@ -7,9 +7,10 @@ import Link from 'next/link';
 interface ResultsProps {
     results: Array<Card>;
     cerebroQuery?: string;
+    detailsEnabled: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
+const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled }) => {
     const [activeClassifications, setActiveClassifications] = useState<string[]>([]);
     const [activeTypes, setActiveTypes] = useState<string[]>([]);
     const [sortBy, setSortBy] = useState<string>('id');
@@ -29,20 +30,20 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
             if (prev.includes(classification)) {
                 return prev.filter(c => c !== classification);
             }
-            
+
             // If selecting "Player"
             if (classification === 'Player') {
                 // Remove any specific non-Encounter classifications, add Player
                 // Keep Encounter if it was selected (though they're mutually exclusive in filtering)
                 return [...prev.filter(c => c === 'Encounter'), 'Player'];
             }
-            
+
             // If selecting "Encounter"
             if (classification === 'Encounter') {
                 // Remove Player if selected, add Encounter
                 return [...prev.filter(c => c !== 'Player'), 'Encounter'];
             }
-            
+
             // If selecting a specific classification (Justice, Protection, etc.)
             // Remove "Player" if it's active, since specific filters take precedence
             const withoutPlayer = prev.filter(c => c !== 'Player');
@@ -64,18 +65,18 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
     const filteredResults = results.filter(card => {
         // Smart classification filtering
         let classificationMatches = activeClassifications.length === 0;
-        
+
         if (activeClassifications.length > 0) {
             // Check if card's classification is in the active filters
             const directMatch = activeClassifications.includes(card.Classification);
-            
+
             // Check if "Player" filter is active and card is non-Encounter
-            const playerMatch = activeClassifications.includes('Player') && 
-                                card.Classification !== 'Encounter';
-            
+            const playerMatch = activeClassifications.includes('Player') &&
+                card.Classification !== 'Encounter';
+
             classificationMatches = directMatch || playerMatch;
         }
-        
+
         const typeMatches = activeTypes.length === 0 || activeTypes.includes(card.Type);
         return classificationMatches && typeMatches;
     }).sort((a, b) => {
@@ -129,18 +130,18 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
         const count = results.filter(card => {
             // Apply classification filter logic
             let classificationMatches = activeClassifications.length === 0;
-            
+
             if (activeClassifications.length > 0) {
                 const directMatch = activeClassifications.includes(card.Classification);
-                const playerMatch = activeClassifications.includes('Player') && 
-                                    card.Classification !== 'Encounter';
+                const playerMatch = activeClassifications.includes('Player') &&
+                    card.Classification !== 'Encounter';
                 classificationMatches = directMatch || playerMatch;
             }
-            
+
             // Check if this card matches the type we're counting
             return classificationMatches && card.Type === type;
         }).length;
-        
+
         counts[type] = count;
         return counts;
     }, {} as Record<string, number>);
@@ -169,9 +170,9 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
             <div className={styles.quickFiltersBar}>
                 <div className={styles.quickFilterItem}>
                     <label htmlFor="sort-select" className={styles.quickLabel}>Sort:</label>
-                    <select 
+                    <select
                         id="sort-select"
-                        value={sortBy} 
+                        value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className={styles.compactDropdown}
                     >
@@ -184,8 +185,8 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                         <option value="resource">Resource</option>
                     </select>
                 </div>
-                
-                <button 
+
+                <button
                     className={styles.advancedFiltersToggle}
                     onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
                 >
@@ -203,7 +204,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                     {activeClassifications.map(classification => (
                         <span key={classification} className={styles.activeChip}>
                             {classification}
-                            <button 
+                            <button
                                 className={styles.chipRemove}
                                 onClick={() => toggleClassificationFilter(classification)}
                                 aria-label={`Remove ${classification} filter`}
@@ -215,7 +216,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                     {activeTypes.map(type => (
                         <span key={type} className={styles.activeChip}>
                             {type}
-                            <button 
+                            <button
                                 className={styles.chipRemove}
                                 onClick={() => toggleTypeFilter(type)}
                                 aria-label={`Remove ${type} filter`}
@@ -247,7 +248,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                             ))}
                         </div>
                     </div>
-                    
+
                     <div className={styles.filterGroup}>
                         <label className={styles.filterGroupLabel}>Type</label>
                         <div className={styles.chipContainer}>
@@ -255,14 +256,14 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                                 const count = typeResultCounts[type];
                                 const isDisabled = count === 0;
                                 const isActive = activeTypes.includes(type);
-                                
+
                                 return (
                                     <button
                                         key={type}
                                         className={
-                                            isDisabled ? styles.chipDisabled : 
-                                            isActive ? styles.chipActive : 
-                                            styles.chip
+                                            isDisabled ? styles.chipDisabled :
+                                                isActive ? styles.chipActive :
+                                                    styles.chip
                                         }
                                         onClick={() => !isDisabled && toggleTypeFilter(type)}
                                         disabled={isDisabled}
@@ -280,18 +281,22 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
             <div className={styles.resultsCount}>
                 {filteredResults.length} {filteredResults.length === 1 ? 'card' : 'cards'}
             </div>
-
             <ul className={styles.resultsList}>
                 {filteredResults.map((card, index) => (
-                    <Link key={index} href={`/card/${card.Id}`}>
-                        <CardImage card={card} />
-                    </Link>
+                    //return CardImage wrapped in link if detailsEnabled.  Otherwise, just return CardImage
+                    detailsEnabled ? (
+                        <Link key={index} href={`/card/${card.Id}`}>
+                            <CardImage card={card} />
+                        </Link>
+                    ) : (
+                        <CardImage key={index} card={card} />
+                    )
                 ))}
             </ul>
 
             {/* Utility Buttons */}
             <div className={styles.utilityButtons}>
-                <button 
+                <button
                     className={styles.exportButton}
                     onClick={exportResultsAsJson}
                     title="Export filtered results as JSON"
@@ -301,7 +306,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery }) => {
                 </button>
 
                 {cerebroQuery && (
-                    <button 
+                    <button
                         className={styles.apiButton}
                         onClick={() => window.open(`https://cerebro-beta-bot.herokuapp.com/query?${cerebroQuery}`, '_blank')}
                         title="View API query in new tab"

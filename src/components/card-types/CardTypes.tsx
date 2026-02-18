@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from "./CardTypes.module.css";
+import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link';
 
 const card_types = [
@@ -12,13 +13,15 @@ const capitalize = (str: string) => {
 
 const CardTypes: React.FC = () => {
     return (
-        <div className={styles.cardTypes}>
+        <div className={sharedStyles.sectionContainer}>
             <h3>Types</h3>
-            {card_types.map(ct => (
-                <Link href={`/cards/type/${ct}`} key={ct} passHref className={styles.cardTypesButton}>
-                    {capitalize(ct)}
-                </Link>
-            ))}
+            <div className={sharedStyles.buttonGrid}>
+                {card_types.map(ct => (
+                    <Link href={`/cards/type/${ct}`} key={ct} passHref className={sharedStyles.redButton} style={{ borderStyle: 'solid' }}>
+                        {capitalize(ct)}
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 };
