@@ -13,25 +13,25 @@
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "axios": "^1.6.1",
-    "loadable-image": "^3.0.6",
-    "next": "14.0.2",
-    "react": "^18",
-    "react-dom": "^18",
+    "loadable-image": "^3.3.0",
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-spinners": "^0.15.0",
-    "swr": "^2.2.5"
+    "swr": "^2.4.0"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.2",
+    "eslint": "^9",
+    "eslint-config-next": "^16.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=20"
   }
 }
