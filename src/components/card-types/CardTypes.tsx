@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from "./CardTypes.module.css";
 import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link';
 

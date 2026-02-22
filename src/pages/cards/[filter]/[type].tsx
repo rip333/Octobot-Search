@@ -29,7 +29,7 @@ interface Params extends ParsedUrlQuery {
   type: string;
 }
 
-const Page: React.FC<PageProps> = ({ cards, loading, error, cerebroQuery, origin, detailsEnabled }) => {
+const Page: React.FC<PageProps> = ({ cards, loading, error, cerebroQuery, detailsEnabled }) => {
   if (error) {
     console.error('Error fetching cards');
   }

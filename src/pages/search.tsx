@@ -45,7 +45,7 @@ const Search: React.FC = () => {
             <Header miniLogo={true} />
             <SearchBar />
             {loading && <Loading />}
-            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} detailsEnabled={router.query.origin !== 'ms' && router.query.origin !== 'usi'} />}
+            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} detailsEnabled={true} />}
             {searchResults.length === 0 && !loading && <NoResults />}
             <Footer />
         </div>

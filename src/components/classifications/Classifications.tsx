@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from "./Classifications.module.css";
 import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link'; // Import Link
 

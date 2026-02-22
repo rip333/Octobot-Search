@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link'; // Import Link from next/link
-import styles from "./CardPacks.module.css";
 import sharedStyles from "../../styles/Shared.module.css";
 import { CardPack } from '@/models/CardPack';
 
