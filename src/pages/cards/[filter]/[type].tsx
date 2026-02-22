@@ -8,6 +8,7 @@ import { ParsedUrlQuery } from 'querystring';
 import Loading from '@/components/loading/Loading';
 import { fetchMerlinCards } from '@/merlin-api';
 import { merlinCardToCard } from '@/merlin-adapter';
+import SearchBar from '@/components/search-bar/SearchBar';
 
 const fetcher = async (url: string) => {
   const res = await axios.get(url);
@@ -35,7 +36,8 @@ const Page: React.FC<PageProps> = ({ cards, loading, error, cerebroQuery, origin
 
   return (
     <div>
-      <Header miniLogo={true} origin={origin} />
+      <Header miniLogo={true} />
+      <SearchBar />
       {loading && <Loading />}
       {!loading && <Results results={cards || []} cerebroQuery={cerebroQuery} detailsEnabled={detailsEnabled} />}
       <Footer />

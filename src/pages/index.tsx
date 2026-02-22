@@ -1,16 +1,13 @@
 import React from 'react';
 import Header from "@/components/header/Header";
 import axios from "axios";
-import CardSets from "@/components/card-sets/CardSets";
-import CardPacks from "@/components/card-packs/CardPacks";
-import UnofficialCardSets from "@/components/card-sets/UnofficialCardSets";
-import Classifications from "@/components/classifications/Classifications";
 import Footer from "@/components/footer/Footer";
 import { CardSet } from "../models/CardSet";
 import { CardPack } from "../models/CardPack";
 import { MerlinPack } from '@/models/MerlinPack';
-import CardTypes from '@/components/card-types/CardTypes';
 import { useRouter } from 'next/router';
+import Browse from '@/components/browse/Browse';
+import SearchBar from '@/components/search-bar/SearchBar';
 
 // Fetcher function to fetch data from API
 const fetcher = async (url: string) => {
@@ -43,30 +40,17 @@ const Home: React.FC<{
 
   return (
     <div style={{ textAlign: "center" }}>
-      <Header miniLogo={false} origin={origin as string} />
-      <div style={{ width: "90%", display: "inline-block" }}>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <>
-            {isUnofficial ? (
-              <UnofficialCardSets unofficialCerebroSets={unofficialSets} merlinPacks={merlinPacks} />
-            ) : (
-              <>
-                <CardSets cardSets={sets} />
-                <CardPacks cardPacks={packs} />
-              </>
-            )}
-            {!isUnofficial && (
-              <>
-                <Classifications />
-                <CardTypes />
-              </>
-            )}
-          </>
-        )}
-        <Footer />
-      </div>
+      <Header miniLogo={false} />
+      <SearchBar />
+      <Browse
+        isUnofficial={isUnofficial}
+        sets={sets}
+        packs={packs}
+        unofficialSets={unofficialSets}
+        merlinPacks={merlinPacks}
+        loading={loading}
+      />
+      <Footer />
     </div>
   );
 };

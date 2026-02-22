@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './Header.module.css'; // Import the CSS Module
-import SearchBar from '../search-bar/SearchBar';
 import logo from '../../logo.png';
 import textLogo from "../../icon-text.png";
-import FilterOptions from '../filters/FilterOptions';
 import Link from 'next/link';
 import Image from 'next/image';
 
 interface HeaderProps {
   miniLogo: boolean;
-  origin?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ miniLogo, origin }) => {
-  //   const [origin, setOrigin] = useState('official');
+const Header: React.FC<HeaderProps> = ({ miniLogo }) => {
 
   return (
     <div className={styles.OctobotHeader}>
@@ -31,7 +27,6 @@ const Header: React.FC<HeaderProps> = ({ miniLogo, origin }) => {
           </Link>
         </>
       }
-      <SearchBar origin={origin} />
     </div>);
 };
 

@@ -5,25 +5,36 @@ import Link from 'next/link';
 import { CardSet } from "../../models/CardSet";
 import { MerlinPack } from "../../models/MerlinPack";
 
+import { merlinPackToCardSet } from '@/merlin-adapter';
+
 interface UnofficialCardSetsProps {
     unofficialCerebroSets: CardSet[];
     merlinPacks: MerlinPack[];
 }
 
 const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ unofficialCerebroSets, merlinPacks }) => {
-    // Sort Merlin packs by position/name
-    const sortedMerlinPacks = [...merlinPacks].sort((a, b) => a.name.localeCompare(b.name));
+    // Convert Merlin packs to CardSets and mark their source
+    const adaptedMerlinSets = merlinPacks.map(pack => ({
+        ...merlinPackToCardSet(pack),
+        Source: 'ms' as const
+    }));
 
-    // Sort Cerebro sets by type, then name
-    const sortedCerebroSets = [...unofficialCerebroSets].sort((a, b) => {
+    const adaptedCerebroSets = unofficialCerebroSets.map(set => ({
+        ...set,
+        Source: 'usi' as const
+    }));
+
+    // Combine and sort
+    const allCustomSets = [...adaptedMerlinSets, ...adaptedCerebroSets].sort((a, b) => {
         if (a.Type !== b.Type) return a.Type.localeCompare(b.Type);
         return a.Name.localeCompare(b.Name);
     });
 
-    // Group Cerebro sets by type
-    const cerebroTypes = Array.from(new Set(sortedCerebroSets.map(s => s.Type)));
-    const typeOrder = ["Hero Set", "Villain Set", "Modular Set", "Nemesis Set", "Campaign Set", "Supplementary Set"];
-    cerebroTypes.sort((a, b) => {
+    // Group by type
+    const types = Array.from(new Set(allCustomSets.map(s => s.Type)));
+    const typeOrder = ["Hero Set", "Villain Set", "Modular Set", "Nemesis Set", "Campaign Set", "Supplementary Set", "Core"];
+
+    types.sort((a, b) => {
         const indexA = typeOrder.indexOf(a);
         const indexB = typeOrder.indexOf(b);
         if (indexA === -1 && indexB === -1) return a.localeCompare(b);
@@ -34,32 +45,23 @@ const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ unofficialCereb
 
     return (
         <div className={sharedStyles.sectionContainer}>
-            <div className={styles.categorySection}>
-                <h2>Merlin Custom Content</h2>
-                <div className={sharedStyles.buttonGrid}>
-                    {sortedMerlinPacks.map(pack => (
-                        <Link href={`/cards/ms/${pack.code}`} key={pack.code} className={sharedStyles.redButton} role="button">
-                            {pack.name}
-                        </Link>
-                    ))}
-                </div>
-            </div>
-
-            <div className={styles.categorySection}>
-                <h2>Unofficial Cerebro Content</h2>
-                {cerebroTypes.map(type => (
-                    <div key={type} className={styles.typeSection}>
-                        <h3>{type}</h3>
-                        <div className={sharedStyles.buttonGrid}>
-                            {sortedCerebroSets.filter(set => set.Type === type).map(set => (
-                                <Link href={`/cards/usi/${set.Id}`} key={set.Id} className={sharedStyles.redButton} role="button">
-                                    {set.Name}
-                                </Link>
-                            ))}
-                        </div>
+            {types.map(type => (
+                <div key={type} className={styles.typeSection}>
+                    <h3>{type}</h3>
+                    <div className={sharedStyles.buttonGrid}>
+                        {allCustomSets.filter(set => set.Type === type).map(set => (
+                            <Link
+                                href={`/cards/${set.Source}/${set.Id}`}
+                                key={`${set.Source}-${set.Id}`}
+                                className={sharedStyles.redButton}
+                                role="button"
+                            >
+                                {set.Name}
+                            </Link>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </div>
+            ))}
         </div>
     );
 };

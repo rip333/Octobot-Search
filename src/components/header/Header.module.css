@@ -18,7 +18,7 @@
 }
 
 .OctobotLogo {
-  max-width: 100%;
+  max-width: 70%;
   height: auto;
 }
 
@@ -28,7 +28,7 @@
   max-width: 400px;
 }
 
-.OctobotMiniLogo img{
+.OctobotMiniLogo img {
   height: auto;
   width: 100%;
 }
@@ -44,14 +44,15 @@
     height: auto;
     width: 50%;
   }
-  
+
   .OctobotHeader {
-    padding: 10px; /* Reduce padding on smaller screens */
+    padding: 10px;
+    /* Reduce padding on smaller screens */
   }
 
   .OctobotLogo {
-    display:none;
-  }  
+    display: none;
+  }
 
   .OctobotMobileLogo {
     height: auto;
@@ -62,6 +63,7 @@
   /* You might need to adjust other elements for better mobile presentation */
   /* For example, if your SearchBar has specific width set somewhere, adjust it here */
   .SearchBarClassName {
-    width: 100%; /* Example: make the search bar full width on smaller screens */
+    width: 100%;
+    /* Example: make the search bar full width on smaller screens */
   }
 }

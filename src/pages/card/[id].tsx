@@ -5,6 +5,7 @@ import { Card } from "@/models/Card";
 import Header from "@/components/header/Header";
 import CardDisplay from "@/components/card-display/CardDisplay";
 import Footer from "@/components/footer/Footer";
+import SearchBar from '@/components/search-bar/SearchBar';
 
 interface PageProps {
   card: Card | null;
@@ -19,13 +20,14 @@ const fetcher = async (url: string) => {
 const Page: React.FC<PageProps> = ({ card, error }) => {
   if (error) {
     console.error('Error fetching card');
-    return <div>Error loading the card.</div>; 
+    return <div>Error loading the card.</div>;
   }
 
   if (!card) {
     return (
       <div>
         <Header miniLogo={true} />
+        <SearchBar />
         <div>Loading...</div>
         <Footer />
       </div>
@@ -35,6 +37,7 @@ const Page: React.FC<PageProps> = ({ card, error }) => {
   return (
     <div>
       <Header miniLogo={true} />
+      <SearchBar />
       <CardDisplay card={card} />
       <Footer />
     </div>
@@ -42,7 +45,7 @@ const Page: React.FC<PageProps> = ({ card, error }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards'); 
+  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards');
   const cards: Card[] = res.data;
 
   const paths = cards.map(card => ({
@@ -51,7 +54,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: 'blocking', 
+    fallback: 'blocking',
   };
 };
 

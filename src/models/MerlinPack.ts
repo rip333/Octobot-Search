@@ -13,4 +13,6 @@ export interface MerlinPack {
     environment: string | null;
     visibility: string;
     language: string;
+    pack_type: string;
+    pack_type_name: string;
 }

@@ -9,6 +9,7 @@ import { createSearchQuery } from '@/searchUtils';
 import NoResults from '@/components/no-results/NoResults';
 import Loading from '@/components/loading/Loading';
 import Footer from '@/components/footer/Footer';
+import SearchBar from '@/components/search-bar/SearchBar';
 
 const Search: React.FC = () => {
     const router = useRouter();
@@ -22,7 +23,7 @@ const Search: React.FC = () => {
 
             if (router.query.query) {
                 try {
-                    let searchQuery = createSearchQuery(router.query.query as string, { origin: router.query.origin as string })
+                    let searchQuery = createSearchQuery(router.query.query as string, { origin: 'official' })
                     setCerebroQuery(searchQuery);
                     let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?${searchQuery}`);
                     setSearchResults(results?.data.reverse());
@@ -37,11 +38,12 @@ const Search: React.FC = () => {
         };
 
         fetchData();
-    }, [router.query.query, router.query.origin]);
+    }, [router.query.query]);
 
     return (
         <div>
-            <Header miniLogo={true} origin={router.query.origin as string} />
+            <Header miniLogo={true} />
+            <SearchBar />
             {loading && <Loading />}
             {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} detailsEnabled={router.query.origin !== 'ms' && router.query.origin !== 'usi'} />}
             {searchResults.length === 0 && !loading && <NoResults />}

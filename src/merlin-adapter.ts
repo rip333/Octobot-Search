@@ -49,10 +49,10 @@ export const merlinPackToCardPack = (merlinPack: MerlinPack): CardPack => {
     return {
         Id: merlinPack.code,
         Name: merlinPack.name,
-        Type: "Merlin Custom", // Distinguish from Cerebro packs
+        Type: merlinPack.pack_type_name || "Merlin Custom", // Use pack_type_name if available
         Number: merlinPack.position.toString(),
         Incomplete: merlinPack.known < merlinPack.total,
-        SpoilerTag: merlinPack.status === "spoiled" // Assuming 'spoiled' status exists, otherwise false
+        SpoilerTag: merlinPack.status === "spoiled"
     };
 };
 
@@ -75,11 +75,11 @@ export const merlinCardsToCardSets = (merlinCards: MerlinCard[]): CardSet[] => {
             Id: setCode,
             Name: firstCard.card_set_name,
             Official: firstCard.status === "Official",
-            Type: "Merlin Custom Set", // Or derive from deck_type if available
+            Type: "Merlin Custom Set", // Cards don't have pack_type_name yet
             Deleted: false,
             CanSimulate: false,
             Deviation: false,
-            Modulars: 0, // Not easily derived without more logic
+            Modulars: 0,
             PackId: firstCard.pack_code
         });
     });
@@ -88,11 +88,26 @@ export const merlinCardsToCardSets = (merlinCards: MerlinCard[]): CardSet[] => {
 };
 
 export const merlinPackToCardSet = (merlinPack: MerlinPack): CardSet => {
+    // Map merlin pack types to cerebro-like types for better grouping if needed, 
+    // but user suggested pack_type_name for display.
+    let type = merlinPack.pack_type_name || "Merlin Custom Set";
+
+    // Optional: normalize to cerebro types if they match
+    if (merlinPack.pack_type === "hero" || merlinPack.pack_type === "hero_fanmade") {
+        type = "Hero Set";
+    } else if (merlinPack.pack_type === "scenario" || merlinPack.pack_type === "scenar_fanmade") {
+        type = "Villain Set";
+    } else if (merlinPack.pack_type === "fm_theme") {
+        type = "Modular Set";
+    } else if (merlinPack.pack_type === "story") {
+        type = "Campaign Set";
+    }
+
     return {
         Id: merlinPack.code,
         Name: merlinPack.name,
         Official: merlinPack.status === "Official",
-        Type: "Merlin Custom Set", // Default type for Merlin packs when treated as sets
+        Type: type,
         Deleted: false,
         CanSimulate: false,
         Deviation: false,
