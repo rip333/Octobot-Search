@@ -23,7 +23,7 @@ const SearchBar: React.FC = () => {
 
     const handleForm = async (event: React.FormEvent) => {
         event.preventDefault()
-        handleSearch(searchText, router, 'official');
+        handleSearch(searchText, router);
     };
 
     return (

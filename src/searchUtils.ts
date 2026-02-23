@@ -24,7 +24,13 @@ export const createSearchQuery = (searchString: string, filterOptions: { origin:
         // Remove quotes for the current token if it's a phrase
         let processedToken = token.replace(/"/g, '');
         const encodedToken = encodeURIComponent(processedToken);
-        return searchParameters.map(param => `${param}:"${encodedToken}"`).join('|');
+        return searchParameters.map(param => {
+            if (param === 'tr') {
+                const trToken = encodeURIComponent(processedToken.replace(/[^a-zA-Z]/g, ''));
+                return `${param}:"${trToken}"`;
+            }
+            return `${param}:"${encodedToken}"`;
+        }).join('|');
     });
 
     // Combine query parts with OR operators
