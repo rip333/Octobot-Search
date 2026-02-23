@@ -29,7 +29,8 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
 
     const uniqueClassifications = useMemo(() => Array.from(new Set(results.map(card => card.Classification))).sort(), [results]);
     const hasPlayerCards = useMemo(() => results.some(card => card.Classification !== 'Encounter'), [results]);
-    const classificationOptions = hasPlayerCards ? ['Player', ...uniqueClassifications] : uniqueClassifications;
+    const hasEncounter = useMemo(() => uniqueClassifications.includes('Encounter'), [uniqueClassifications]);
+    const classificationOptions = useMemo(() => (hasEncounter && hasPlayerCards) ? ['Player', ...uniqueClassifications] : uniqueClassifications, [hasEncounter, hasPlayerCards, uniqueClassifications]);
 
     const uniqueTypes = useMemo(() => Array.from(new Set(results.map(card => card.Type))).sort(), [results]);
 
@@ -162,45 +163,49 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
 
             {advancedFiltersOpen && (
                 <div className={styles.advancedFiltersPanel}>
-                    <div className={styles.filterGroup}>
-                        <button
-                            className={styles.filterSectionToggle}
-                            onClick={() => setIsClassificationOpen(!isClassificationOpen)}
-                            type="button"
-                        >
-                            <span className={styles.filterGroupLabel}>Classification</span>
-                            <span className={styles.sectionChevron}>{isClassificationOpen ? '▲' : '▼'}</span>
-                        </button>
-                        {isClassificationOpen && (
-                            <div className={styles.chipContainer}>
-                                {classificationOptions.map(classification => (
-                                    <button key={classification} className={activeClassifications.includes(classification) ? styles.chipActive : styles.chip} onClick={() => toggleClassificationFilter(classification)}>
-                                        {classification}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <div className={styles.filterGroup}>
-                        <button
-                            className={styles.filterSectionToggle}
-                            onClick={() => setIsTypeOpen(!isTypeOpen)}
-                            type="button"
-                        >
-                            <span className={styles.filterGroupLabel}>Type</span>
-                            <span className={styles.sectionChevron}>{isTypeOpen ? '▲' : '▼'}</span>
-                        </button>
-                        {isTypeOpen && (
-                            <div className={styles.chipContainer}>
-                                {uniqueTypes.map(type => (
-                                    <button key={type} className={activeTypes.includes(type) ? styles.chipActive : styles.chip} onClick={() => toggleTypeFilter(type)}>
-                                        {type}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    {uniqueTraits.length > 0 && (
+                    {classificationOptions.length > 1 && (
+                        <div className={styles.filterGroup}>
+                            <button
+                                className={styles.filterSectionToggle}
+                                onClick={() => setIsClassificationOpen(!isClassificationOpen)}
+                                type="button"
+                            >
+                                <span className={styles.filterGroupLabel}>Classification</span>
+                                <span className={styles.sectionChevron}>{isClassificationOpen ? '▲' : '▼'}</span>
+                            </button>
+                            {isClassificationOpen && (
+                                <div className={styles.chipContainer}>
+                                    {classificationOptions.map(classification => (
+                                        <button key={classification} className={activeClassifications.includes(classification) ? styles.chipActive : styles.chip} onClick={() => toggleClassificationFilter(classification)}>
+                                            {classification}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {uniqueTypes.length > 1 && (
+                        <div className={styles.filterGroup}>
+                            <button
+                                className={styles.filterSectionToggle}
+                                onClick={() => setIsTypeOpen(!isTypeOpen)}
+                                type="button"
+                            >
+                                <span className={styles.filterGroupLabel}>Type</span>
+                                <span className={styles.sectionChevron}>{isTypeOpen ? '▲' : '▼'}</span>
+                            </button>
+                            {isTypeOpen && (
+                                <div className={styles.chipContainer}>
+                                    {uniqueTypes.map(type => (
+                                        <button key={type} className={activeTypes.includes(type) ? styles.chipActive : styles.chip} onClick={() => toggleTypeFilter(type)}>
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {uniqueTraits.length > 1 && (
                         <div className={styles.filterGroup}>
                             <button
                                 className={styles.filterSectionToggle}
