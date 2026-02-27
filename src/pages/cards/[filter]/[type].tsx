@@ -75,6 +75,23 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params
       query = `input=(si:"${type}"%26o:"false")`;
       cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
       origin = "unofficial";
+    } else if (filter === "dl") {
+      // MarvelCDB Decklist
+      const decklist = await fetcher(`https://marvelcdb.com/api/public/decklist/${type}`);
+      const slots = decklist.slots;
+      const cardIds = Object.keys(slots);
+
+      if (cardIds.length > 0) {
+        // Construct query: input=(id:"01001"|id:"01002"|...)
+        const idFilters = cardIds.map(id => `id:"${id}"`).join('|');
+        query = `input=(${idFilters})`;
+
+        cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
+      } else {
+        cards = [];
+      }
+
+      origin = "official";
     } else {
       // Default (Cerebro Official)
       query = `input=(${filter}:"${type}"%26o:"true")`;

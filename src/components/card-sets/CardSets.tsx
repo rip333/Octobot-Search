@@ -4,10 +4,11 @@ import Link from 'next/link'; // Import Link from next/link
 import { CardSet } from "../../models/CardSet";
 
 interface CardSetsProps {
-    cardSets: Array<CardSet>
+    cardSets: Array<CardSet>;
+    baseLink?: string;
 }
 
-const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
+const CardSets: React.FC<CardSetsProps> = ({ cardSets, baseLink = "/cards/si/" }) => {
     // Sort card sets by type, hero sets display first
     let heroSets: CardSet[] = [];
     let otherSets: CardSet[] = [];
@@ -44,7 +45,7 @@ const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
                     <h3>{type}</h3>
                     <div className={sharedStyles.buttonGrid}>
                         {cardSets.filter(set => set.Type === type).map(filteredSet => (
-                            <Link href={`/cards/si/${filteredSet.Id}`} key={filteredSet.Id} passHref className={sharedStyles.redButton} role="button">
+                            <Link href={`${baseLink}${filteredSet.Id}`} key={filteredSet.Id} passHref className={sharedStyles.redButton} role="button">
                                 {filteredSet.Name}
                             </Link>
                         ))}

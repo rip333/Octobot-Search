@@ -8,6 +8,8 @@ import { CardSet } from "@/models/CardSet";
 import { CardPack } from "@/models/CardPack";
 import { MerlinPack } from '@/models/MerlinPack';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import sharedStyles from "../../styles/Shared.module.css";
 import styles from './Browse.module.css';
 
 interface BrowseProps {
@@ -78,6 +80,14 @@ const Browse: React.FC<BrowseProps> = ({
                         <>
                             <Classifications />
                             <CardTypes />
+                            <div className={sharedStyles.sectionContainer}>
+                                <h3>Community</h3>
+                                <div className={sharedStyles.buttonGrid}>
+                                    <Link href="/decklists" passHref className={sharedStyles.redButton} role="button">
+                                        Popular Decklists
+                                    </Link>
+                                </div>
+                            </div>
                         </>
                     )}
                 </>
