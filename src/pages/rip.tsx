@@ -112,6 +112,22 @@ const Rip: React.FC = () => {
                         />
                         <div className={styles.projectLabel}>Rachel Summers</div>
                     </Link>
+                    <Link href="/cards/ms/nightwing_by_ripper3" className={styles.projectCard}>
+                        <img
+                            src="https://db.merlindumesnil.net/bundles/cards/206501a.png    "
+                            alt="Nightwing"
+                            className={styles.projectImage}
+                        />
+                        <div className={styles.projectLabel}>Nightwing</div>
+                    </Link>
+                    <Link href="/cards/ms/web_of_deceit_by_ripper3" className={styles.projectCard}>
+                        <img
+                            src="https://db.merlindumesnil.net/bundles/cards/503164a.jpg"
+                            alt="Web of Deceit (Campaign)"
+                            className={styles.projectImage}
+                        />
+                        <div className={styles.projectLabel}>Web of Deceit (Campaign)</div>
+                    </Link>
                 </div>
             </section>
 
