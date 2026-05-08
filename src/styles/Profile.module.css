@@ -2,7 +2,7 @@
     max-width: 1000px;
     margin: 0 auto;
     padding: 40px 20px;
-    font-family: 'AvenirNextLtPro', 'Inter', sans-serif;
+    font-family: inherit;
     color: #f0f0f0;
     background: radial-gradient(circle at top right, #1a1a2e 0%, #0f0f1a 100%);
     min-height: 100vh;

@@ -2,7 +2,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'AvenirNextLtPro';
+    font-family: var(--font-manrope, sans-serif), -apple-system, BlinkMacSystemFont, 'AvenirNextLtPro';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #001126;
@@ -19,7 +19,7 @@ button {
     font-size: 13px;
     margin: 4px 6px;
     border-radius: 5px;
-    font-family: 'AvenirNextLtPro';
+    font-family: var(--font-manrope, sans-serif), 'AvenirNextLtPro';
     background-color: #ed1d2479;
     cursor: pointer;
 }

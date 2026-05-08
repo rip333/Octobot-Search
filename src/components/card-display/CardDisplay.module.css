@@ -1,6 +1,6 @@
 .cardDisplay {
     color: white;
-    font-family: 'AvenirNextLtPro';
+    font-family: inherit;
     padding: 24px;
     width: 90%;
     display: flex;
