@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './FilterOptions.module.css';
 import { Card } from "../../models/Card";
+import { Funnel, SortAscending } from "@phosphor-icons/react";
 
 interface FilterOptionsProps {
     results: Card[];
@@ -119,7 +120,8 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
     return (
         <div className={styles.container}>
             <div className={styles.quickFiltersBar}>
-                <div className={styles.quickFilterItem}>
+                <div className={styles.quickFilterItem} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <SortAscending size={18} weight="bold" />
                     <label htmlFor="sort-select" className={styles.quickLabel}>Sort:</label>
                     <select id="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={styles.compactDropdown}>
                         <option value="id">Card ID</option>
@@ -131,8 +133,8 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
                         <option value="resource">Resource</option>
                     </select>
                 </div>
-                <button className={styles.advancedFiltersToggle} onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}>
-                    <span>🔍</span>
+                <button className={styles.advancedFiltersToggle} onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Funnel size={16} weight="bold" />
                     <span>Filters</span>
                     {hasActiveFilters && <span className={styles.filterBadge}>{totalActiveFilters}</span>}
                     <span className={styles.chevron}>{advancedFiltersOpen ? '▲' : '▼'}</span>

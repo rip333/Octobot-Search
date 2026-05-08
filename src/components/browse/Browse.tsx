@@ -10,6 +10,8 @@ import { MerlinPack } from '@/models/MerlinPack';
 import { useRouter } from 'next/router';
 import styles from './Browse.module.css';
 
+import { CheckCircle, Warning } from "@phosphor-icons/react";
+
 interface BrowseProps {
     isUnofficial: boolean;
     sets: CardSet[];
@@ -49,15 +51,17 @@ const Browse: React.FC<BrowseProps> = ({
                         type="button"
                         aria-pressed={origin === 'official'}
                         onClick={() => handleOriginChange('official')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        ✔︎ Official
+                        <CheckCircle size={18} weight="fill" /> Official
                     </button>
                     <button
                         type="button"
                         aria-pressed={origin === 'unofficial'}
                         onClick={() => handleOriginChange('unofficial')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        ✦ Unofficial
+                        <Warning size={18} weight="fill" /> Unofficial
                     </button>
                 </div>
             </div>
