@@ -9,7 +9,7 @@ const searchParameters = [
     'tr'
 ];
 
-export const createSearchQuery = (searchString: string, filterOptions: { origin: string }) => {
+export const createSearchQuery = (searchString: string, filterOptions: { origin: string }, joinOperator: string = '%26') => {
     // Use a regular expression to match phrases inside quotes or single words
     const regex = /"[^"]+"|\S+/g;
     const tokens = [];
@@ -33,8 +33,8 @@ export const createSearchQuery = (searchString: string, filterOptions: { origin:
         }).join('|');
     });
 
-    // Combine query parts with OR operators
-    const combinedQuery = queryParts.join('|');
+    // Combine query parts with the specified operator. Enclose each part in parentheses to ensure correct precedence.
+    const combinedQuery = queryParts.map(part => `(${part})`).join(joinOperator);
 
     // Add the filter options to the query
     const filterQueries = [];

@@ -4,6 +4,7 @@ import { Card } from "../../models/Card";
 import CardImage from "../card-image/CardImage";
 import Link from 'next/link';
 import FilterOptions from '../filters/FilterOptions';
+import { DownloadSimple, Link as LinkIcon } from '@phosphor-icons/react';
 
 interface ResultsProps {
     results: Array<Card>;
@@ -62,7 +63,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled
                     onClick={exportResultsAsJson}
                     title="Export filtered results as JSON"
                 >
-                    <span>💾</span>
+                    <DownloadSimple size={20} weight="bold" />
                     <span>Export JSON</span>
                 </button>
 
@@ -72,7 +73,7 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled
                         onClick={() => window.open(`https://cerebro-beta-bot.herokuapp.com/query?${cerebroQuery}`, '_blank')}
                         title="View API query in new tab"
                     >
-                        <span>🔗</span>
+                        <LinkIcon size={20} weight="bold" />
                         <span>View API</span>
                     </button>
                 )}
