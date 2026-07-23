@@ -9,11 +9,7 @@ import { useRouter } from 'next/router';
 import Browse from '@/components/browse/Browse';
 import SearchBar from '@/components/search-bar/SearchBar';
 
-// Fetcher function to fetch data from API
-const fetcher = async (url: string) => {
-  const res = await axios.get(url);
-  return res.data;
-};
+import { fetcherWithRetry } from '@/utils/fetcher';
 
 const Home: React.FC<{
   sets: CardSet[],
@@ -58,10 +54,10 @@ const Home: React.FC<{
 export async function getStaticProps() {
   try {
     const [sets, packs, cerebroSets, merlinPacksData] = await Promise.all([
-      fetcher('https://cerebro-beta-bot.herokuapp.com/sets?official=true'),
-      fetcher('https://cerebro-beta-bot.herokuapp.com/packs?official=true'),
-      fetcher('https://cerebro-beta-bot.herokuapp.com/sets?origin=unofficial'),
-      fetcher('https://db.merlindumesnil.net/api/public/packs/')
+      fetcherWithRetry('https://cerebro-beta-bot.herokuapp.com/sets?official=true'),
+      fetcherWithRetry('https://cerebro-beta-bot.herokuapp.com/packs?official=true'),
+      fetcherWithRetry('https://cerebro-beta-bot.herokuapp.com/sets?origin=unofficial'),
+      fetcherWithRetry('https://db.merlindumesnil.net/api/public/packs/')
     ]);
 
     const unofficialCerebroSets = (cerebroSets as CardSet[]).filter(x => !x.Official);

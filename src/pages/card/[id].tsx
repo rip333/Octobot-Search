@@ -7,15 +7,12 @@ import CardDisplay from "@/components/card-display/CardDisplay";
 import Footer from "@/components/footer/Footer";
 import SearchBar from '@/components/search-bar/SearchBar';
 
+import { fetcherWithRetry } from '@/utils/fetcher';
+
 interface PageProps {
   card: Card | null;
   error: boolean;
 }
-
-const fetcher = async (url: string) => {
-  const res = await axios.get(url);
-  return res.data;
-};
 
 const Page: React.FC<PageProps> = ({ card, error }) => {
   if (error) {
@@ -55,7 +52,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const { id } = params!;
 
   try {
-    const data = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${id}"%26o:"true")`);
+    const data = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${id}"%26o:"true")`);
     const card = data && data.length > 0 ? data[0] : null;
 
     return {

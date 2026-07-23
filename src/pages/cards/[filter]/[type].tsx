@@ -9,11 +9,7 @@ import Loading from '@/components/loading/Loading';
 import { fetchMerlinCards } from '@/merlin-api';
 import { merlinCardToCard } from '@/merlin-adapter';
 import SearchBar from '@/components/search-bar/SearchBar';
-
-const fetcher = async (url: string) => {
-  const res = await axios.get(url);
-  return res.data;
-};
+import { fetcherWithRetry } from '@/utils/fetcher';
 
 interface PageProps {
   cards: Card[];
@@ -73,12 +69,12 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params
     } else if (filter === "usi") {
       // Unofficial Cerebro Set
       query = `input=(si:"${type}"%26o:"false")`;
-      cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
+      cards = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
       origin = "unofficial";
     } else {
       // Default (Cerebro Official)
       query = `input=(${filter}:"${type}"%26o:"true")`;
-      cards = await fetcher(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
+      cards = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
       origin = "official";
     }
 
