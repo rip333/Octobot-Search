@@ -34,21 +34,32 @@ function getDriveClient() {
   let keyFile: any;
 
   if (process.env.GCP_KEY_JSON) {
-    keyFile = typeof process.env.GCP_KEY_JSON === 'string'
-      ? JSON.parse(process.env.GCP_KEY_JSON)
-      : process.env.GCP_KEY_JSON;
+    try {
+      keyFile = typeof process.env.GCP_KEY_JSON === 'string'
+        ? JSON.parse(process.env.GCP_KEY_JSON)
+        : process.env.GCP_KEY_JSON;
+    } catch (e) {
+      throw new Error('GCP_KEY_JSON environment variable is not valid JSON.');
+    }
   } else {
     const keyPath = path.join(process.cwd(), 'gcp-key.json');
     if (!fs.existsSync(keyPath)) {
-      throw new Error('gcp-key.json file not found at repository root and GCP_KEY_JSON env is missing.');
+      throw new Error('Google Drive credentials not configured. Please add GCP_KEY_JSON environment variable or gcp-key.json file to root.');
     }
     keyFile = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
   }
 
+  const clientEmail = keyFile.client_email;
+  const privateKey = keyFile.private_key ? keyFile.private_key.replace(/\\n/g, '\n') : '';
+
+  if (!clientEmail || !privateKey) {
+    throw new Error('Invalid GCP Service Account key structure.');
+  }
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      client_email: keyFile.client_email,
-      private_key: keyFile.private_key,
+      client_email: clientEmail,
+      private_key: privateKey,
     },
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
   });
