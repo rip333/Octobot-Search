@@ -19,5 +19,12 @@ jobs:
       - name: Installing my packages
         run: npm ci
 
+      - name: Create GCP Key file from secret 🔑
+        env:
+          GCP_KEY_JSON: ${{ secrets.GCP_KEY_JSON }}
+        run: echo "$GCP_KEY_JSON" > gcp-key.json
+
       - name: Build my App
         run: npm run build
+        env:
+          GCP_KEY_JSON: ${{ secrets.GCP_KEY_JSON }}

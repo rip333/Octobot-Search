@@ -14,6 +14,7 @@
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "axios": "^1.6.1",
+    "googleapis": "^173.0.0",
     "loadable-image": "^3.3.0",
     "next": "^16.1.6",
     "react": "^19.2.4",

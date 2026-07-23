@@ -6,6 +6,7 @@ import { CardSet } from "../../models/CardSet";
 import { MerlinPack } from "../../models/MerlinPack";
 
 import { merlinPackToCardSet } from '@/merlin-adapter';
+import { getCreators } from '@/data/creators';
 
 interface UnofficialCardSetsProps {
     unofficialCerebroSets: CardSet[];
@@ -13,6 +14,8 @@ interface UnofficialCardSetsProps {
 }
 
 const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ unofficialCerebroSets, merlinPacks }) => {
+    const creators = getCreators();
+
     // Convert Merlin packs to CardSets and mark their source
     const adaptedMerlinSets = merlinPacks.map(pack => ({
         ...merlinPackToCardSet(pack),
@@ -45,6 +48,23 @@ const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ unofficialCereb
 
     return (
         <div className={sharedStyles.sectionContainer}>
+            {creators.length > 0 && (
+                <div className={styles.typeSection}>
+                    <h3>Creator Drive Libraries</h3>
+                    <div className={sharedStyles.buttonGrid}>
+                        {creators.map(creator => (
+                            <Link
+                                href={`/creators/${encodeURIComponent(creator.id || creator.name)}`}
+                                key={creator.id || creator.name}
+                                className={sharedStyles.redButton}
+                                role="button"
+                            >
+                                {creator.name}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
             {types.map(type => (
                 <div key={type} className={styles.typeSection}>
                     <h3>{type}</h3>

@@ -48,14 +48,12 @@ const Rip: React.FC = () => {
                         </div>
                     </Link>
                     <Link
-                        href="https://drive.google.com/drive/folders/17cwUOAMOBPP1taTyVarPUKLGWOAoZK68"
+                        href="/creators/ripper3"
                         className={styles.card}
-                        target="_blank"
-                        rel="noopener noreferrer"
                     >
                         <div>
-                            <div className={styles.cardTitle}>✦ Google Drive</div>
-                            <div className={styles.cardDesc}>Contains my homebrew content, alters, photoshop templates, scripts, and more.</div>
+                            <div className={styles.cardTitle}>✦ Google Drive Explorer</div>
+                            <div className={styles.cardDesc}>Browse homebrew content, alters, photoshop templates, scripts, and more directly in Octobot.</div>
                         </div>
                     </Link>
                 </div>
