@@ -45,15 +45,8 @@ const Page: React.FC<PageProps> = ({ card, error }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await axios.get('https://cerebro-beta-bot.herokuapp.com/cards');
-  const cards: Card[] = res.data;
-
-  const paths = cards.map(card => ({
-    params: { id: card.Id.toString() }
-  }));
-
   return {
-    paths,
+    paths: [],
     fallback: 'blocking',
   };
 };
