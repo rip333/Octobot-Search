@@ -1,4 +1,0 @@
-interface:
-  display_name: "Octobot Search Executive Memory"
-  short_description: "Curate Octobot decisions and project memory"
-  default_prompt: "Use $octobot-search-executive-memory to reconcile this discussion with the Octobot Search project vault."

@@ -49,6 +49,7 @@ next-env.d.ts
 /scripts/*.tif
 /scripts/*.tiff
 
-# Obsidian local UI state; keep the vault notes and shared app settings tracked.
-/obsidian/**/.obsidian/workspace.json
-/obsidian/**/.obsidian/workspace-mobile.json
+# Local assistant and project-memory workspaces.
+/obsidian*/
+/.claude*/
+/.agents*/
