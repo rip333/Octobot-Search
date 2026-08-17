@@ -59,6 +59,7 @@ const parseCard = (value: unknown, index: number): Card => {
     Printings: printings,
     Resource: optionalStringValue(value.Resource),
     Rules: optionalStringValue(value.Rules),
+    Stage: optionalStringValue(value.Stage),
     Subname: stringValue(value.Subname),
     Thwart: optionalStringValue(value.Thwart),
     Traits: Array.isArray(value.Traits)

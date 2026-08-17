@@ -19,11 +19,22 @@ const LANDSCAPE = { width: 515, height: 365 };
 /** Schemes are printed landscape. This depends only on card data, never on viewport width. */
 const isLandscape = (card: Card): boolean => card.Type.includes('Scheme');
 
+const STAGE_SIDE = /^[0-9]*([A-D])$/;
+
+const ID_ENDS_IN_LETTER = /[a-z]$/i;
+
+const imageId = (card: Card, id: string): string => {
+  if (card.Type !== 'Main Scheme' || ID_ENDS_IN_LETTER.test(id)) return id;
+
+  const side = card.Stage?.match(STAGE_SIDE)?.[1];
+  return side ? `${id}${side}` : id;
+};
+
 const imageUrl = (card: Card, artificialId: string | undefined, showBack: boolean): string => {
   if (showBack && card.BackImageUrl) return card.BackImageUrl;
   if (card.ImageUrl) return card.ImageUrl;
 
-  const id = artificialId || card.Id;
+  const id = imageId(card, artificialId || card.Id);
   const folder = card.Official ? 'official' : 'unofficial';
   return `${CEREBRO_IMAGE_BASE_URL}${folder}/${id}.jpg`;
 };

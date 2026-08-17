@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BROWSE_FILTERS, isCerebroCardId, parseBrowseRoute } from './routeParams';
+import { CARD_CLASSIFICATIONS, CARD_TYPES } from '@/utils/cardVocabulary';
 
 const UUID = '3dd91f75-3cb4-407f-8797-d9fb430cb4ae';
 
@@ -10,13 +11,35 @@ describe('parseBrowseRoute', () => {
     expect(parseBrowseRoute('usi', UUID)).toEqual({ filter: 'usi', type: UUID });
     expect(parseBrowseRoute('ms', 'alligator_loki_by_ripper3'))
       .toEqual({ filter: 'ms', type: 'alligator_loki_by_ripper3' });
+    expect(parseBrowseRoute('cl', 'Justice')).toEqual({ filter: 'cl', type: 'Justice' });
+    expect(parseBrowseRoute('type', 'ally')).toEqual({ filter: 'type', type: 'ally' });
   });
 
   it('rejects filters outside the supported set', () => {
     for (const filter of ['n', 'ru', 'tr', 'o', '', 'SI', 'si;drop']) {
       expect(parseBrowseRoute(filter, UUID)).toBeNull();
     }
-    expect(BROWSE_FILTERS).toEqual(['si', 'pi', 'usi', 'ms']);
+    expect(BROWSE_FILTERS).toEqual(['si', 'pi', 'usi', 'ms', 'cl', 'type']);
+  });
+
+  it.each(CARD_CLASSIFICATIONS.map(classification => classification.name))(
+    'accepts the classification %s linked from the browse page',
+    name => {
+      expect(parseBrowseRoute('cl', name)).toEqual({ filter: 'cl', type: name });
+    },
+  );
+
+  it.each(CARD_TYPES)('accepts the card type %s linked from the browse page', type => {
+    expect(parseBrowseRoute('type', type)).toEqual({ filter: 'type', type });
+  });
+
+  it('rejects classifications and types outside the game vocabulary', () => {
+    for (const value of ['justice', 'JUSTICE', 'Justice"&o:"false', '', 'Sorcery']) {
+      expect(parseBrowseRoute('cl', value)).toBeNull();
+    }
+    for (const value of ['Ally', 'ally"&o:"false', '', 'spaceship']) {
+      expect(parseBrowseRoute('type', value)).toBeNull();
+    }
   });
 
   it('rejects Cerebro collection IDs that are not UUIDs', () => {

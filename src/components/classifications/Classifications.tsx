@@ -1,17 +1,9 @@
 import React from 'react';
 import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link'; // Import Link
+import { CARD_CLASSIFICATIONS } from '@/utils/cardVocabulary';
 
-const c12ns = [
-    { name: "Aggression", color: "red" },
-    { name: "Justice", color: "yellow" },
-    { name: "Leadership", color: "blue" },
-    { name: "Protection", color: "green" },
-    { name: "Pool", color: "pink" },
-    { name: "Basic", color: "grey" },
-    { name: "Hero", color: "white" },
-    { name: "Encounter", color: "purple" }
-]
+const c12ns = CARD_CLASSIFICATIONS;
 
 const Classifications: React.FC = () => {
     return (

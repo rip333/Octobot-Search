@@ -11,6 +11,7 @@ export interface Card {
   Printings: Printing[];
   Resource?: string;
   Rules?: string;
+  Stage?: string;
   Subname: string;
   Thwart?: string;
   Traits: string[];
