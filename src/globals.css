@@ -34,12 +34,21 @@ h2 {
 }
 
 
+/* Global keyboard-focus fallback for controls without a component-level rule. */
+:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* Local display fonts should not block first paint. */
 @font-face {
     font-family: 'ChampionsIcons';
     src: url('/fonts/ChampionsIcons.ttf');
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'AvenirNextLtPro';
     src: url('/fonts/AvenirNextLTPro-Regular.otf');
+    font-display: swap;
 }

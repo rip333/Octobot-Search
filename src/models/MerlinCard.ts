@@ -1,60 +1,31 @@
+/**
+ * The subset of a Merlin card the adapter consumes.
+ *
+ * Merlin omits stat keys entirely when a card has no such stat (an alter-ego
+ * has no `cost`, `attack`, or `thwart` key at all), so every stat is optional
+ * as well as nullable.
+ */
 export interface MerlinCard {
-    pack_code: string;
-    pack_name: string;
-    type_code: string;
-    type_name: string;
-    faction_code: string;
-    faction_name: string;
-    card_set_code: string;
-    card_set_name: string;
-    position: number;
     code: string;
     name: string;
-    real_name: string;
-    cost: number | null;
-    text: string;
-    real_text: string;
-    quantity: number;
-    health: number | null;
-    health_per_hero: boolean;
-    thwart: number | null;
-    thwart_cost: number | null;
-    scheme: number | null;
-    attack: number | null;
-    attack_cost: number | null;
-    defense: number | null;
-    defense_cost: number | null;
-    recover: number | null;
-    recover_cost: number | null;
-    base_threat: number | null;
-    base_threat_fixed: boolean;
-    escalation_threat: number | null;
-    escalation_threat_fixed: boolean;
-    scheme_crisis: number | null;
-    scheme_acceleration: number | null;
-    scheme_hazard: number | null;
-    threat: number | null;
-    threat_fixed: boolean;
-    hand_size: number | null;
-    deck_limit: number;
-    traits: string;
-    real_traits: string;
-    flavor: string | null;
-    illustrator: string | null;
-    is_unique: boolean;
-    hidden: boolean;
-    permanent: boolean;
-    double_sided: boolean;
-    back_text: string | null;
-    back_flavor: string | null;
-    back_name: string | null;
-    octgn_id: string | null;
-    url: string;
-    imagesrc: string | null;
-    backimagesrc: string | null;
+    real_name?: string;
+    type_name: string;
+    faction_name: string;
+    real_traits?: string;
+    real_text?: string;
+    text?: string;
+    cost?: number | null;
+    health?: number | null;
+    attack?: number | null;
+    thwart?: number | null;
+    is_unique?: boolean;
     status: string;
-    creator: string;
-    theme: string;
-    visibility: string;
-    language: string;
+    creator?: string;
+    imagesrc?: string | null;
+    backimagesrc?: string | null;
+    double_sided?: boolean;
+    pack_code: string;
+    position?: number | null;
+    card_set_code?: string;
+    flavor?: string | null;
 }

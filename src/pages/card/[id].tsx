@@ -1,78 +1,82 @@
 import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import axios from "axios";
+import { ParsedUrlQuery } from 'querystring';
 import { Card } from "@/models/Card";
 import Header from "@/components/header/Header";
 import CardDisplay from "@/components/card-display/CardDisplay";
 import Footer from "@/components/footer/Footer";
+import PageMeta from '@/components/page-meta/PageMeta';
 import SearchBar from '@/components/search-bar/SearchBar';
 
-import { fetcherWithRetry } from '@/utils/fetcher';
+import { fetchCerebroCards } from '@/api/cerebro';
+import { OFFICIAL_ONLY, all, predicate, serializeCerebroQuery } from '@/api/cerebroQuery';
+import { isCerebroCardId } from '@/api/routeParams';
+import {
+  CONTENT_REVALIDATE_SECONDS,
+  NOT_FOUND_REVALIDATE_SECONDS,
+  UpstreamUnavailableError,
+} from '@/api/revalidate';
 
 interface PageProps {
-  card: Card | null;
-  error: boolean;
+  card: Card;
 }
 
-const Page: React.FC<PageProps> = ({ card, error }) => {
-  if (error) {
-    console.error('Error fetching card');
-    return <div>Error loading the card.</div>;
-  }
+interface Params extends ParsedUrlQuery {
+  id: string;
+}
 
-  if (!card) {
-    return (
-      <div>
-        <Header miniLogo={true} />
-        <SearchBar />
-        <div>Loading...</div>
-        <Footer />
-      </div>
-    );
-  }
+const cardDescription = (card: Card): string => {
+  const heading = card.Subname ? `${card.Name} - ${card.Subname}` : card.Name;
+  return `${heading}. ${card.Classification} ${card.Type}.`.trim();
+};
 
-  return (
-    <div>
-      <Header miniLogo={true} />
-      <SearchBar />
+const Page: React.FC<PageProps> = ({ card }) => (
+  <div>
+    <PageMeta
+      title={card.Subname ? `${card.Name} - ${card.Subname}` : card.Name}
+      description={cardDescription(card)}
+    />
+    <Header miniLogo={true} />
+    <SearchBar />
+    <main>
       <CardDisplay card={card} />
-      <Footer />
-    </div>
-  );
-};
+    </main>
+    <Footer />
+  </div>
+);
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  };
-};
+export const getStaticPaths: GetStaticPaths<Params> = async () => ({
+  // Card pages are generated on demand; pre-rendering a fixed list would go
+  // stale on every release without reducing cold-start work meaningfully.
+  paths: [],
+  fallback: 'blocking',
+});
 
-export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
-  const { id } = params!;
+export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
+  const id = params?.id;
 
-  try {
-    const data = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?input=(id:"${id}"%26o:"true")`);
-    const card = data && data.length > 0 ? data[0] : null;
+  // Reject malformed IDs before querying, so crawlers cannot mint cache entries.
+  if (!isCerebroCardId(id)) {
+    return { notFound: true, revalidate: NOT_FOUND_REVALIDATE_SECONDS };
+  }
 
+  const query = serializeCerebroQuery(all(predicate('id', id), OFFICIAL_ONLY));
+  const result = await fetchCerebroCards(query);
+
+  if (result.status === 'success') {
     return {
-      props: {
-        card,
-        error: false,
-      },
-      revalidate: 604800, // Revalidate every week
-    };
-  } catch (error) {
-    console.error('Error fetching card:', error);
-
-    return {
-      props: {
-        card: null,
-        error: true,
-      },
-      revalidate: 604800, // Revalidate every week
+      props: { card: result.data[0] },
+      revalidate: CONTENT_REVALIDATE_SECONDS,
     };
   }
+
+  // Cerebro answered and has no such card. Expire soon so a newly published
+  // card becomes reachable without a redeploy.
+  if (result.status === 'empty') {
+    return { notFound: true, revalidate: NOT_FOUND_REVALIDATE_SECONDS };
+  }
+
+  throw new UpstreamUnavailableError(result.reason);
 };
 
 export default Page;

@@ -17,6 +17,8 @@ export interface Card {
   Type: string;
   Unique: boolean;
   ImageUrl: string;
+  /** Set only for double-sided cards that ship a distinct back image (Merlin). */
+  BackImageUrl?: string;
 }
 
 interface Printing {

@@ -1,30 +1,53 @@
-name: GitHub Pages deploy
+name: CI
 
+# Deployment is owned by the Vercel Git integration. This workflow only
+# verifies the branch; it never publishes anything.
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+
+# Read-only: nothing here writes to the repository or publishes artifacts.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v4
+      # Actions are pinned to immutable commit SHAs; the trailing comment
+      # records which release each SHA corresponds to.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22.x'
+          cache: 'npm'
 
-      - name: Installing my packages
+      - name: Install dependencies
         run: npm ci
 
-      - name: Create GCP Key file from secret 🔑
-        env:
-          GCP_KEY_JSON: ${{ secrets.GCP_KEY_JSON }}
-        run: echo "$GCP_KEY_JSON" > gcp-key.json
+      - name: Type-check
+        run: npm run typecheck
 
-      - name: Build my App
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Builds the homepage against live Cerebro. A total upstream outage fails
+      # the build on purpose: an empty homepage must never be cached as content.
+      - name: Build
         run: npm run build
-        env:
-          GCP_KEY_JSON: ${{ secrets.GCP_KEY_JSON }}
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=info

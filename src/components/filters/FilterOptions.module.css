@@ -78,7 +78,7 @@
 }
 
 .filterBadge {
-    background-color: #e53e3e;
+    background-color: #c53030;
     color: white;
     border-radius: 10px;
     padding: 2px 6px;
@@ -147,7 +147,7 @@
 
 .clearAll {
     padding: 4px 10px;
-    background-color: #e53e3e;
+    background-color: #c53030;
     color: white;
     border: none;
     border-radius: 4px;
@@ -159,7 +159,7 @@
 }
 
 .clearAll:hover {
-    background-color: #c53030;
+    background-color: #a02020;
 }
 
 /* Advanced Filters Panel - Collapsible */
@@ -286,4 +286,22 @@
     font-size: 0.7rem;
     opacity: 0.8;
     margin-left: 2px;
+}
+/* Visible keyboard focus for every control in this panel. */
+.chip:focus-visible,
+.chipActive:focus-visible,
+.chipRemove:focus-visible,
+.clearAll:focus-visible,
+.advancedFiltersToggle:focus-visible,
+.filterSectionToggle:focus-visible,
+.compactDropdown:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.filterHint {
+    margin: 0 0 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    line-height: 1.4;
 }

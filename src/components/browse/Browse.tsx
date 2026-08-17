@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import CardSets from "@/components/card-sets/CardSets";
 import CardPacks from "@/components/card-packs/CardPacks";
 import UnofficialCardSets from "@/components/card-sets/UnofficialCardSets";
 import Classifications from "@/components/classifications/Classifications";
 import CardTypes from '@/components/card-types/CardTypes';
-import { CardSet } from "@/models/CardSet";
+import Loading from '@/components/loading/Loading';
+import { CardSet, UnofficialCardSet } from "@/models/CardSet";
 import { CardPack } from "@/models/CardPack";
-import { MerlinPack } from '@/models/MerlinPack';
-import { useRouter } from 'next/router';
+import type { UnofficialBrowseResponse } from '@/pages/api/browse/unofficial';
 import styles from './Browse.module.css';
 
 import { CheckCircle, Warning } from "@phosphor-icons/react";
@@ -16,21 +17,69 @@ interface BrowseProps {
     isUnofficial: boolean;
     sets: CardSet[];
     packs: CardPack[];
-    unofficialSets: CardSet[];
-    merlinPacks: MerlinPack[];
-    loading: boolean;
+    setsUnavailable: boolean;
+    packsUnavailable: boolean;
 }
+
+interface UnofficialState {
+    /** `idle` doubles as "request in flight": the fetch is started by the effect below. */
+    status: 'idle' | 'ready' | 'error';
+    sets: UnofficialCardSet[];
+    partial: boolean;
+}
+
+const IDLE_UNOFFICIAL: UnofficialState = { status: 'idle', sets: [], partial: false };
+
+const UnavailableNotice: React.FC<{ label: string }> = ({ label }) => (
+    <p role="status" className={styles.unavailable}>
+        {label} could not be loaded right now. The rest of this page is unaffected.
+    </p>
+);
 
 const Browse: React.FC<BrowseProps> = ({
     isUnofficial,
     sets,
     packs,
-    unofficialSets,
-    merlinPacks,
-    loading
+    setsUnavailable,
+    packsUnavailable,
 }) => {
     const router = useRouter();
     const origin = isUnofficial ? 'unofficial' : 'official';
+
+    const [unofficial, setUnofficial] = useState<UnofficialState>(IDLE_UNOFFICIAL);
+    const [retryCount, setRetryCount] = useState(0);
+    const hasRequested = useRef(false);
+
+    // Community sets are only fetched once the unofficial view is actually opened.
+    useEffect(() => {
+        if (!isUnofficial || hasRequested.current) return;
+
+        hasRequested.current = true;
+        const abortController = new AbortController();
+
+        fetch('/api/browse/unofficial', { signal: abortController.signal })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json() as Promise<UnofficialBrowseResponse>;
+            })
+            .then(data => setUnofficial({ status: 'ready', sets: data.sets, partial: data.partial }))
+            .catch((error: unknown) => {
+                // A toggle back to official aborts the request; allow a later retry.
+                if (error instanceof Error && error.name === 'AbortError') {
+                    hasRequested.current = false;
+                    return;
+                }
+                setUnofficial({ status: 'error', sets: [], partial: false });
+            });
+
+        return () => abortController.abort();
+    }, [isUnofficial, retryCount]);
+
+    const retryUnofficial = useCallback(() => {
+        hasRequested.current = false;
+        setUnofficial(IDLE_UNOFFICIAL);
+        setRetryCount(count => count + 1);
+    }, []);
 
     const handleOriginChange = (newOrigin: string) => {
         const { query } = router;
@@ -53,7 +102,7 @@ const Browse: React.FC<BrowseProps> = ({
                         onClick={() => handleOriginChange('official')}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        <CheckCircle size={18} weight="fill" /> Official
+                        <CheckCircle size={18} weight="fill" aria-hidden="true" /> Official
                     </button>
                     <button
                         type="button"
@@ -61,32 +110,36 @@ const Browse: React.FC<BrowseProps> = ({
                         onClick={() => handleOriginChange('unofficial')}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        <Warning size={18} weight="fill" /> Unofficial
+                        <Warning size={18} weight="fill" aria-hidden="true" /> Unofficial
                     </button>
                 </div>
             </div>
 
-            {loading ? (
-                <div>Loading...</div>
-            ) : (
+            {isUnofficial ? (
                 <>
-                    {isUnofficial ? (
-                        <UnofficialCardSets unofficialCerebroSets={unofficialSets} merlinPacks={merlinPacks} />
-                    ) : (
+                    {unofficial.status === 'idle' && <Loading />}
+                    {unofficial.status === 'ready' && (
                         <>
-                            <CardSets cardSets={sets} />
-                            <CardPacks cardPacks={packs} />
+                            {unofficial.partial && <UnavailableNotice label="Some community sources" />}
+                            <UnofficialCardSets sets={unofficial.sets} />
                         </>
                     )}
-                    {!isUnofficial && (
-                        <>
-                            <Classifications />
-                            <CardTypes />
-                        </>
+                    {unofficial.status === 'error' && (
+                        <div role="alert" className={styles.unavailable}>
+                            <p>Community card sets are temporarily unavailable.</p>
+                            <button type="button" onClick={retryUnofficial}>Try again</button>
+                        </div>
                     )}
                 </>
-            )
-            } </div>
+            ) : (
+                <>
+                    {setsUnavailable ? <UnavailableNotice label="Card sets" /> : <CardSets cardSets={sets} />}
+                    {packsUnavailable ? <UnavailableNotice label="Card packs" /> : <CardPacks cardPacks={packs} />}
+                    <Classifications />
+                    <CardTypes />
+                </>
+            )}
+        </div>
     );
 };
 

@@ -1,184 +1,165 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './FilterOptions.module.css';
 import { Card } from "../../models/Card";
+import {
+    CardFilterState,
+    CardSortKey,
+    EMPTY_CARD_FILTERS,
+    deriveCardFacets,
+    toggleClassification,
+    toggleValue,
+} from '@/utils/cardFilters';
 import { Funnel, SortAscending } from "@phosphor-icons/react";
 
 interface FilterOptionsProps {
     results: Card[];
-    onFilterChange: (filteredResults: Card[]) => void;
+    filters: CardFilterState;
+    onFiltersChange: (filters: CardFilterState) => void;
 }
 
-const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }) => {
-    const [activeClassifications, setActiveClassifications] = useState<string[]>([]);
-    const [activeTypes, setActiveTypes] = useState<string[]>([]);
-    const [activeTraits, setActiveTraits] = useState<string[]>([]);
-    const [sortBy, setSortBy] = useState<string>('id');
-    const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState<boolean>(false);
+const SORT_OPTIONS: Array<{ value: CardSortKey; label: string }> = [
+    { value: 'id', label: 'Card ID' },
+    { value: 'name', label: 'Name' },
+    { value: 'cost', label: 'Cost (low to high)' },
+    { value: 'attack', label: 'Attack (high to low)' },
+    { value: 'thwart', label: 'Thwart (high to low)' },
+    { value: 'health', label: 'Health (high to low)' },
+    // Resources are icons, so this groups by icon rather than comparing values.
+    { value: 'resource', label: 'Resource icon' },
+];
 
-    // Collapsible section states
-    const [isClassificationOpen, setIsClassificationOpen] = useState<boolean>(true);
-    const [isTypeOpen, setIsTypeOpen] = useState<boolean>(true);
-    const [isTraitsOpen, setIsTraitsOpen] = useState<boolean>(true);
+const isSortKey = (value: string): value is CardSortKey =>
+    SORT_OPTIONS.some(option => option.value === value);
 
-    // Reset filters when the base results change (e.g. new search)
-    useEffect(() => {
-        setActiveClassifications([]);
-        setActiveTypes([]);
-        setActiveTraits([]);
-        setSortBy('id');
-    }, [results]);
+const FilterOptions: React.FC<FilterOptionsProps> = ({ results, filters, onFiltersChange }) => {
+    const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+    const [isClassificationOpen, setIsClassificationOpen] = useState(true);
+    const [isTypeOpen, setIsTypeOpen] = useState(true);
+    const [isTraitsOpen, setIsTraitsOpen] = useState(true);
 
-    const uniqueClassifications = useMemo(() => Array.from(new Set(results.map(card => card.Classification))).sort(), [results]);
-    const hasPlayerCards = useMemo(() => results.some(card => card.Classification !== 'Encounter'), [results]);
-    const hasEncounter = useMemo(() => uniqueClassifications.includes('Encounter'), [uniqueClassifications]);
-    const classificationOptions = useMemo(() => (hasEncounter && hasPlayerCards) ? ['Player', ...uniqueClassifications] : uniqueClassifications, [hasEncounter, hasPlayerCards, uniqueClassifications]);
+    const facets = useMemo(() => deriveCardFacets(results), [results]);
 
-    const uniqueTypes = useMemo(() => Array.from(new Set(results.map(card => card.Type))).sort(), [results]);
+    const setClassifications = (classification: string) =>
+        onFiltersChange({ ...filters, classifications: toggleClassification(filters.classifications, classification) });
+    const setTypes = (type: string) =>
+        onFiltersChange({ ...filters, types: toggleValue(filters.types, type) });
+    const setTraits = (trait: string) =>
+        onFiltersChange({ ...filters, traits: toggleValue(filters.traits, trait) });
+    const clearAllFilters = () =>
+        onFiltersChange({ ...EMPTY_CARD_FILTERS, sortBy: filters.sortBy });
 
-    const uniqueTraits = useMemo(() => {
-        const traitsSet = new Set<string>();
-        results.forEach(card => {
-            if (card.Traits) {
-                card.Traits.forEach(t => traitsSet.add(t));
-            }
-        });
-        return Array.from(traitsSet).sort();
-    }, [results]);
-
-    const toggleClassificationFilter = (classification: string) => {
-        setActiveClassifications(prev => {
-            if (prev.includes(classification)) return prev.filter(c => c !== classification);
-            if (classification === 'Player') return [...prev.filter(c => c === 'Encounter'), 'Player'];
-            if (classification === 'Encounter') return [...prev.filter(c => c !== 'Player'), 'Encounter'];
-            const withoutPlayer = prev.filter(c => c !== 'Player');
-            return [...withoutPlayer, classification];
-        });
-    };
-
-    const toggleTypeFilter = (type: string) => {
-        setActiveTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
-    };
-
-    const toggleTraitFilter = (trait: string) => {
-        setActiveTraits(prev => prev.includes(trait) ? prev.filter(t => t !== trait) : [...prev, trait]);
-    };
-
-    const clearAllFilters = () => {
-        setActiveClassifications([]);
-        setActiveTypes([]);
-        setActiveTraits([]);
-    };
-
-    useEffect(() => {
-        const filtered = results.filter(card => {
-            let classificationMatches = activeClassifications.length === 0;
-            if (activeClassifications.length > 0) {
-                const directMatch = activeClassifications.includes(card.Classification);
-                const playerMatch = activeClassifications.includes('Player') && card.Classification !== 'Encounter';
-                classificationMatches = directMatch || playerMatch;
-            }
-
-            const typeMatches = activeTypes.length === 0 || activeTypes.includes(card.Type);
-            const traitMatches = activeTraits.length === 0 || activeTraits.some(t => card.Traits?.includes(t));
-
-            return classificationMatches && typeMatches && traitMatches;
-        }).sort((a, b) => {
-            const parseValue = (val: string | undefined): number => {
-                if (!val || val === '?') return -1;
-                const parsed = parseInt(val, 10);
-                return isNaN(parsed) ? -1 : parsed;
-            };
-
-            switch (sortBy) {
-                case 'name': return a.Name.localeCompare(b.Name);
-                case 'attack': return parseValue(b.Attack) - parseValue(a.Attack);
-                case 'cost': return parseValue(a.Cost) - parseValue(b.Cost);
-                case 'health': return parseValue(b.Health) - parseValue(a.Health);
-                case 'thwart': return parseValue(b.Thwart) - parseValue(a.Thwart);
-                case 'resource': return parseValue(b.Resource) - parseValue(a.Resource);
-                case 'id':
-                default:
-                    const regex = /^(\d+)([A-Za-z]?)$/;
-                    const matchA = a.Id.match(regex);
-                    const matchB = b.Id.match(regex);
-                    if (!matchA || !matchB) return a.Id.localeCompare(b.Id);
-                    const numA = parseInt(matchA[1], 10);
-                    const numB = parseInt(matchB[1], 10);
-                    if (numA !== numB) return numA - numB;
-                    return matchA[2].localeCompare(matchB[2]);
-            }
-        });
-
-        onFilterChange(filtered);
-    }, [results, activeClassifications, activeTypes, activeTraits, sortBy]);
-
-    const totalActiveFilters = activeClassifications.length + activeTypes.length + activeTraits.length;
+    const totalActiveFilters =
+        filters.classifications.length + filters.types.length + filters.traits.length;
     const hasActiveFilters = totalActiveFilters > 0;
 
-    // Optional: Calculate how many results each Type/Trait filter would return
-    // Simple implementation doesn't disable chips for Traits, but displays them
     return (
         <div className={styles.container}>
             <div className={styles.quickFiltersBar}>
                 <div className={styles.quickFilterItem} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <SortAscending size={18} weight="bold" />
+                    <SortAscending size={18} weight="bold" aria-hidden="true" />
                     <label htmlFor="sort-select" className={styles.quickLabel}>Sort:</label>
-                    <select id="sort-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={styles.compactDropdown}>
-                        <option value="id">Card ID</option>
-                        <option value="name">Name</option>
-                        <option value="cost">Cost</option>
-                        <option value="attack">Attack</option>
-                        <option value="thwart">Thwart</option>
-                        <option value="health">Health</option>
-                        <option value="resource">Resource</option>
+                    <select
+                        id="sort-select"
+                        value={filters.sortBy}
+                        onChange={event => {
+                            const next = event.target.value;
+                            if (isSortKey(next)) onFiltersChange({ ...filters, sortBy: next });
+                        }}
+                        className={styles.compactDropdown}
+                    >
+                        {SORT_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
                     </select>
                 </div>
-                <button className={styles.advancedFiltersToggle} onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Funnel size={16} weight="bold" />
+                <button
+                    type="button"
+                    className={styles.advancedFiltersToggle}
+                    onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
+                    aria-expanded={advancedFiltersOpen}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                    <Funnel size={16} weight="bold" aria-hidden="true" />
                     <span>Filters</span>
                     {hasActiveFilters && <span className={styles.filterBadge}>{totalActiveFilters}</span>}
-                    <span className={styles.chevron}>{advancedFiltersOpen ? '▲' : '▼'}</span>
+                    <span className={styles.chevron} aria-hidden="true">{advancedFiltersOpen ? '▲' : '▼'}</span>
                 </button>
             </div>
 
             {hasActiveFilters && (
                 <div className={styles.activeFiltersSummary}>
                     <span className={styles.summaryLabel}>Active filters:</span>
-                    {activeClassifications.map(classification => (
+                    {filters.classifications.map(classification => (
                         <span key={classification} className={styles.activeChip}>
-                            {classification} <button className={styles.chipRemove} onClick={() => toggleClassificationFilter(classification)}>×</button>
+                            {classification}
+                            <button
+                                type="button"
+                                className={styles.chipRemove}
+                                aria-label={`Remove ${classification} filter`}
+                                onClick={() => setClassifications(classification)}
+                            >
+                                ×
+                            </button>
                         </span>
                     ))}
-                    {activeTypes.map(type => (
+                    {filters.types.map(type => (
                         <span key={type} className={styles.activeChip}>
-                            {type} <button className={styles.chipRemove} onClick={() => toggleTypeFilter(type)}>×</button>
+                            {type}
+                            <button
+                                type="button"
+                                className={styles.chipRemove}
+                                aria-label={`Remove ${type} filter`}
+                                onClick={() => setTypes(type)}
+                            >
+                                ×
+                            </button>
                         </span>
                     ))}
-                    {activeTraits.map(trait => (
+                    {filters.traits.map(trait => (
                         <span key={trait} className={styles.activeChip}>
-                            {trait} <button className={styles.chipRemove} onClick={() => toggleTraitFilter(trait)}>×</button>
+                            {trait}
+                            <button
+                                type="button"
+                                className={styles.chipRemove}
+                                aria-label={`Remove ${trait} filter`}
+                                onClick={() => setTraits(trait)}
+                            >
+                                ×
+                            </button>
                         </span>
                     ))}
-                    <button className={styles.clearAll} onClick={clearAllFilters}>Clear all</button>
+                    <button type="button" className={styles.clearAll} onClick={clearAllFilters}>Clear all</button>
                 </div>
             )}
 
             {advancedFiltersOpen && (
                 <div className={styles.advancedFiltersPanel}>
-                    {classificationOptions.length > 1 && (
+                    <p className={styles.filterHint}>
+                        Within a group, a card matches if it has <strong>any</strong> selected value.
+                        Groups combine: a card must match every group you filter on.
+                    </p>
+
+                    {facets.classifications.length > 1 && (
                         <div className={styles.filterGroup}>
                             <button
                                 className={styles.filterSectionToggle}
                                 onClick={() => setIsClassificationOpen(!isClassificationOpen)}
+                                aria-expanded={isClassificationOpen}
                                 type="button"
                             >
                                 <span className={styles.filterGroupLabel}>Classification</span>
-                                <span className={styles.sectionChevron}>{isClassificationOpen ? '▲' : '▼'}</span>
+                                <span className={styles.sectionChevron} aria-hidden="true">{isClassificationOpen ? '▲' : '▼'}</span>
                             </button>
                             {isClassificationOpen && (
                                 <div className={styles.chipContainer}>
-                                    {classificationOptions.map(classification => (
-                                        <button key={classification} className={activeClassifications.includes(classification) ? styles.chipActive : styles.chip} onClick={() => toggleClassificationFilter(classification)}>
+                                    {facets.classifications.map(classification => (
+                                        <button
+                                            key={classification}
+                                            type="button"
+                                            aria-pressed={filters.classifications.includes(classification)}
+                                            className={filters.classifications.includes(classification) ? styles.chipActive : styles.chip}
+                                            onClick={() => setClassifications(classification)}
+                                        >
                                             {classification}
                                         </button>
                                     ))}
@@ -186,20 +167,28 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
                             )}
                         </div>
                     )}
-                    {uniqueTypes.length > 1 && (
+
+                    {facets.types.length > 1 && (
                         <div className={styles.filterGroup}>
                             <button
                                 className={styles.filterSectionToggle}
                                 onClick={() => setIsTypeOpen(!isTypeOpen)}
+                                aria-expanded={isTypeOpen}
                                 type="button"
                             >
                                 <span className={styles.filterGroupLabel}>Type</span>
-                                <span className={styles.sectionChevron}>{isTypeOpen ? '▲' : '▼'}</span>
+                                <span className={styles.sectionChevron} aria-hidden="true">{isTypeOpen ? '▲' : '▼'}</span>
                             </button>
                             {isTypeOpen && (
                                 <div className={styles.chipContainer}>
-                                    {uniqueTypes.map(type => (
-                                        <button key={type} className={activeTypes.includes(type) ? styles.chipActive : styles.chip} onClick={() => toggleTypeFilter(type)}>
+                                    {facets.types.map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            aria-pressed={filters.types.includes(type)}
+                                            className={filters.types.includes(type) ? styles.chipActive : styles.chip}
+                                            onClick={() => setTypes(type)}
+                                        >
                                             {type}
                                         </button>
                                     ))}
@@ -207,20 +196,28 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ results, onFilterChange }
                             )}
                         </div>
                     )}
-                    {uniqueTraits.length > 1 && (
+
+                    {facets.traits.length > 1 && (
                         <div className={styles.filterGroup}>
                             <button
                                 className={styles.filterSectionToggle}
                                 onClick={() => setIsTraitsOpen(!isTraitsOpen)}
+                                aria-expanded={isTraitsOpen}
                                 type="button"
                             >
                                 <span className={styles.filterGroupLabel}>Traits</span>
-                                <span className={styles.sectionChevron}>{isTraitsOpen ? '▲' : '▼'}</span>
+                                <span className={styles.sectionChevron} aria-hidden="true">{isTraitsOpen ? '▲' : '▼'}</span>
                             </button>
                             {isTraitsOpen && (
                                 <div className={styles.chipContainer}>
-                                    {uniqueTraits.map(trait => (
-                                        <button key={trait} className={activeTraits.includes(trait) ? styles.chipActive : styles.chip} onClick={() => toggleTraitFilter(trait)}>
+                                    {facets.traits.map(trait => (
+                                        <button
+                                            key={trait}
+                                            type="button"
+                                            aria-pressed={filters.traits.includes(trait)}
+                                            className={filters.traits.includes(trait) ? styles.chipActive : styles.chip}
+                                            onClick={() => setTraits(trait)}
+                                        >
                                             {trait}
                                         </button>
                                     ))}

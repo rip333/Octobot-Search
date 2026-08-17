@@ -1,20 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './SearchBar.module.css'; // Import the CSS Module
 import { useRouter } from 'next/router';
 import { handleSearch } from '@/searchUtils';
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
 const SearchBar: React.FC = () => {
-    const [searchText, setSearchText] = useState('');
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
+    const routeSearchText = typeof router.query.query === 'string' ? router.query.query : '';
 
-    // Update searchText when the router query changes
     useEffect(() => {
-        if (router.query.query && typeof router.query.query === 'string') {
-            setSearchText(router.query.query);
-        }
-
         // Autofocus logic for non-mobile devices
         const isNonMobile = window.innerWidth > 768; // Example breakpoint for mobile devices
         if (isNonMobile && inputRef.current) {
@@ -24,7 +19,10 @@ const SearchBar: React.FC = () => {
 
     const handleForm = async (event: React.FormEvent) => {
         event.preventDefault()
-        handleSearch(searchText, router);
+        const searchText = inputRef.current?.value.trim() ?? '';
+        if (searchText) {
+            handleSearch(searchText, router);
+        }
     };
 
     return (
@@ -36,10 +34,10 @@ const SearchBar: React.FC = () => {
                         aria-label="Search"
                         placeholder="Search for Marvel Champions cards (official only)"
                         type="search"
-                        value={searchText}
+                        key={routeSearchText}
+                        defaultValue={routeSearchText}
                         ref={inputRef}
                         required
-                        onChange={(e) => setSearchText(e.target.value)}
                         style={{ paddingLeft: '40px' }}
                     />
                 </div>

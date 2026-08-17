@@ -1,27 +1,45 @@
-// Footer.jsx
 import React from 'react';
-import styles from './Footer.module.css'; // Import the CSS Module
+import styles from './Footer.module.css';
 
-const Footer: React.FC = () => {
-    return (
-        <footer className={styles.footer}>
+const Footer: React.FC = () => (
+    <footer className={styles.footer}>
+        <nav aria-label="Project and data sources">
             <ul className={styles.links}>
                 <li className={styles.linkItem}>
-                    <a href="https://github.com/rip333/Octobot-Search" className={styles.link}>
+                    <a
+                        href="https://github.com/rip333/Octobot-Search"
+                        className={styles.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         Github
                     </a>
                 </li>
                 <li className={styles.linkItem}>
-                    Powered by: <a href="https://github.com/UnicornSnuggler/Cerebro" className={styles.link}>
+                    Powered by:{' '}
+                    <a
+                        href="https://github.com/UnicornSnuggler/Cerebro"
+                        className={styles.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         Cerebro
                     </a>
                 </li>
                 <li className={styles.linkItem}>
-                    Powered by: <a href="https://db.merlindumesnil.net/api/" className={styles.link}>db.merlindumesnil.net</a>
+                    Powered by:{' '}
+                    <a
+                        href="https://mc4db.merlindumesnil.net/api/"
+                        className={styles.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        mc4db.merlindumesnil.net
+                    </a>
                 </li>
             </ul>
-        </footer>
-    );
-};
+        </nav>
+    </footer>
+);
 
 export default Footer;

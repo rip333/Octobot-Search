@@ -1,55 +1,32 @@
 import React from 'react';
 import sharedStyles from "../../styles/Shared.module.css";
-import Link from 'next/link'; // Import Link from next/link
+import Link from 'next/link';
 import { CardSet } from "../../models/CardSet";
+import { compareCardSets } from '@/utils/cardCollections';
 
 interface CardSetsProps {
     cardSets: Array<CardSet>
 }
 
 const CardSets: React.FC<CardSetsProps> = ({ cardSets }) => {
-    // Sort card sets by type, hero sets display first
-    let heroSets: CardSet[] = [];
-    let otherSets: CardSet[] = [];
-
-    cardSets.forEach(set => {
-        if (set.Type.includes("Hero")) {
-            heroSets.push(set);
-        } else {
-            otherSets.push(set);
-        }
-    });
-
-    let sortedSets = [...heroSets, ...otherSets];
-
-    let uniqueTypes: string[] = [];
-    sortedSets.forEach(set => {
-        if (!uniqueTypes.includes(set.Type)) {
-            uniqueTypes.push(set.Type);
-        }
-    });
-
-    // Define the custom order
-    const typeOrder = ["Hero Set", "Villain Set", "Modular Set", "Nemesis Set", "Campaign Set", "Supplementary Set"];
-
-    // Sort uniqueTypes based on the predefined order
-    uniqueTypes.sort((a, b) => typeOrder.indexOf(a) - typeOrder.indexOf(b));
-
-    cardSets.sort((a, b) => a.Name.localeCompare(b.Name));
+    const sortedCardSets = [...cardSets].sort(compareCardSets);
+    const uniqueTypes = Array.from(new Set(sortedCardSets.map(set => set.Type)));
 
     return (
         <div className={sharedStyles.sectionContainer}>
             {uniqueTypes.map(type => (
-                <div key={type}>
+                <section key={type}>
                     <h3>{type}</h3>
-                    <div className={sharedStyles.buttonGrid}>
-                        {cardSets.filter(set => set.Type === type).map(filteredSet => (
-                            <Link href={`/cards/si/${filteredSet.Id}`} key={filteredSet.Id} passHref className={sharedStyles.redButton} role="button">
-                                {filteredSet.Name}
-                            </Link>
+                    <ul className={sharedStyles.buttonGrid}>
+                        {sortedCardSets.filter(set => set.Type === type).map(filteredSet => (
+                            <li key={filteredSet.Id}>
+                                <Link href={`/cards/si/${filteredSet.Id}`} className={sharedStyles.redButton}>
+                                    {filteredSet.Name}
+                                </Link>
+                            </li>
                         ))}
-                    </div>
-                </div>
+                    </ul>
+                </section>
             ))}
         </div>
     );
