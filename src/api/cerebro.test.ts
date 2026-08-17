@@ -20,6 +20,12 @@ describe('parseCerebroCards', () => {
     });
   });
 
+  it('keeps the stage of a multi-sided card', () => {
+    const [card] = parseCerebroCards([{ Id: '60135', Name: 'Bull in a China Shop', Type: 'Main Scheme', Stage: '1B' }]);
+
+    expect(card.Stage).toBe('1B');
+  });
+
   it('rejects non-array and unidentifiable card responses', () => {
     expect(() => parseCerebroCards({})).toThrow(CerebroResponseError);
     expect(() => parseCerebroCards([{ Name: 'Missing ID' }])).toThrow(CerebroResponseError);

@@ -9,7 +9,7 @@ import PageMeta from '@/components/page-meta/PageMeta';
 import SearchBar from '@/components/search-bar/SearchBar';
 
 import { fetchCerebroCards } from '@/api/cerebro';
-import { officialFieldQuery } from '@/api/cerebroQuery';
+import { CerebroField, officialFieldQuery } from '@/api/cerebroQuery';
 import { fetchMerlinCards } from '@/api/merlin';
 import { BrowseFilter, parseBrowseRoute } from '@/api/routeParams';
 import {
@@ -55,8 +55,16 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => ({
   fallback: 'blocking',
 });
 
-/** Cerebro-backed collections support card detail pages; Merlin cards do not. */
-const detailsEnabledFor = (filter: BrowseFilter): boolean => filter === 'si' || filter === 'pi';
+/** Official Cerebro collections support card detail pages; unofficial and Merlin cards do not. */
+const detailsEnabledFor = (filter: BrowseFilter): boolean => filter !== 'ms' && filter !== 'usi';
+
+const CEREBRO_FIELDS: Record<Exclude<BrowseFilter, 'ms'>, CerebroField> = {
+  si: 'setId',
+  usi: 'setId',
+  pi: 'packId',
+  cl: 'classification',
+  type: 'cardType',
+};
 
 const fetchCollection = async (
   filter: BrowseFilter,
@@ -71,8 +79,7 @@ const fetchCollection = async (
     return { result, cerebroQuery: null };
   }
 
-  const field = filter === 'pi' ? 'packId' : 'setId';
-  const cerebroQuery = officialFieldQuery(field, type, filter !== 'usi');
+  const cerebroQuery = officialFieldQuery(CEREBRO_FIELDS[filter], type, filter !== 'usi');
 
   return { result: await fetchCerebroCards(cerebroQuery), cerebroQuery };
 };

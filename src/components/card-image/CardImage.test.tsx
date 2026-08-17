@@ -90,3 +90,41 @@ describe('CardImage orientation', () => {
     expect(image()!.getAttribute('src')).toContain('example.test');
   });
 });
+
+describe('CardImage main scheme stage sides', () => {
+  const mainScheme = (overrides: Partial<Card>) =>
+    makeCard({ Type: 'Main Scheme', ...overrides });
+
+  const source = () => image()!.getAttribute('src')!;
+
+  it('appends the stage side when the ID omits it', () => {
+    render(<CardImage card={mainScheme({ Id: '60135', Stage: '1B' })} />);
+
+    expect(source()).toContain('60135B.jpg');
+  });
+
+  it('appends the stage side to the selected printing too', () => {
+    render(<CardImage card={mainScheme({ Id: '60135', Stage: '1B' })} artificialId="60135" />);
+
+    expect(source()).toContain('60135B.jpg');
+  });
+
+  it('leaves an ID that already carries its side letter alone', () => {
+    render(<CardImage card={mainScheme({ Id: '60134B', Stage: '1B' })} />);
+
+    expect(source()).toContain('60134B.jpg');
+    expect(source()).not.toContain('60134BB');
+  });
+
+  it('leaves a single-sided stage alone', () => {
+    render(<CardImage card={mainScheme({ Id: '32142', Stage: '1' })} />);
+
+    expect(source()).toContain('32142.jpg');
+  });
+
+  it('does not touch lettered stages on other card types', () => {
+    render(<CardImage card={makeCard({ Id: '07018', Type: 'Villain', Stage: 'B' })} />);
+
+    expect(source()).toContain('07018.jpg');
+  });
+});

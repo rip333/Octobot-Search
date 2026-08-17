@@ -1,10 +1,9 @@
 import React from 'react';
 import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link';
+import { CARD_TYPES } from '@/utils/cardVocabulary';
 
-const card_types = [
-    "ally", "alter-ego", "attachment", "environment", "event", "hero", "main scheme", "minion", "obligation", "resource", "side scheme", "support", "treachery", "upgrade", "villain"
-]
+const card_types = CARD_TYPES;
 
 const capitalize = (str: string) => {
     return str.replace(/\b\w/g, char => char.toUpperCase());

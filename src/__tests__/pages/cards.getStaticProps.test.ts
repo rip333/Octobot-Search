@@ -93,6 +93,24 @@ describe('browse route getStaticProps', () => {
     expect(result.props.detailsEnabled).toBe(false);
   });
 
+  it('serves a classification through the cl field', async () => {
+    fetchCerebroCards.mockResolvedValue({ status: 'success', data: [makeCard('1')] });
+
+    const result = await run('cl', 'Justice') as { props: { cerebroQuery: string; detailsEnabled: boolean } };
+
+    expect(new URLSearchParams(result.props.cerebroQuery).get('input')).toBe('(cl:"Justice"&o:"true")');
+    expect(result.props.detailsEnabled).toBe(true);
+  });
+
+  it('serves a card type through the type field', async () => {
+    fetchCerebroCards.mockResolvedValue({ status: 'success', data: [makeCard('1')] });
+
+    const result = await run('type', 'main scheme') as { props: { cerebroQuery: string; detailsEnabled: boolean } };
+
+    expect(new URLSearchParams(result.props.cerebroQuery).get('input')).toBe('(type:"main scheme"&o:"true")');
+    expect(result.props.detailsEnabled).toBe(true);
+  });
+
   it('adapts Merlin cards and exposes no Cerebro query', async () => {
     fetchMerlinCards.mockResolvedValue({ status: 'success', data: [makeMerlinCard()] });
 

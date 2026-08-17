@@ -1,3 +1,5 @@
+import { isCardClassification, isCardType } from '@/utils/cardVocabulary';
+
 /**
  * Route-parameter contracts for the dynamic card routes.
  *
@@ -7,7 +9,7 @@
  */
 
 /** Every browse source the `/cards/[filter]/[type]` route supports. */
-export const BROWSE_FILTERS = ['si', 'pi', 'usi', 'ms'] as const;
+export const BROWSE_FILTERS = ['si', 'pi', 'usi', 'ms', 'cl', 'type'] as const;
 
 export type BrowseFilter = (typeof BROWSE_FILTERS)[number];
 
@@ -47,6 +49,10 @@ export const isValidBrowseType = (filter: BrowseFilter, type: unknown): type is 
       return CEREBRO_UUID.test(type);
     case 'ms':
       return MERLIN_PACK_CODE.test(type);
+    case 'cl':
+      return isCardClassification(type);
+    case 'type':
+      return isCardType(type);
   }
 };
 

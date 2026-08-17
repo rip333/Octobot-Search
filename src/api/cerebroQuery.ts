@@ -13,6 +13,8 @@ const CEREBRO_FIELD_CODES = {
   trait: 'tr',
   setId: 'si',
   packId: 'pi',
+  classification: 'cl',
+  cardType: 'type',
   official: 'o',
 } as const;
 
