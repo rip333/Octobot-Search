@@ -9,13 +9,27 @@
   
   .links {
     list-style: none;
-    padding: 0;
+    margin: 0;
+    padding: 0 1rem;
     display: flex;
+    /* Three items including a long hostname must not force a horizontal
+       scrollbar on narrow phones. */
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 0.5rem 2rem;
   }
-  
+
   .linkItem {
-    margin: 0 1rem;
+    margin: 0;
+    /* Long hostnames break rather than overflow their column. */
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 480px) {
+    .links {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
   }
   
   .link {
@@ -23,4 +37,8 @@
     text-decoration: none;
     transition: color 0.2s ease-in-out;
   }
-  
+
+.link:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}

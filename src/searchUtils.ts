@@ -1,51 +1,66 @@
 // searchUtils.ts
 
-import { NextRouter } from "next/router";
+import type { NextRouter } from "next/router";
+import {
+    CerebroExpression,
+    CerebroField,
+    OFFICIAL_ONLY,
+    all,
+    any,
+    predicate,
+    serializeCerebroQuery,
+} from "@/api/cerebroQuery";
 
-const searchParameters = [
-    'ru',
-    'n',
-    'sn',
-    'tr'
-];
+/** Free-text fields a search term is matched against. */
+const TEXT_SEARCH_FIELDS: readonly CerebroField[] = ['rules', 'name', 'subname'];
 
-export const createSearchQuery = (searchString: string, filterOptions: { origin: string }, joinOperator: string = '%26') => {
-    // Use a regular expression to match phrases inside quotes or single words
-    const regex = /"[^"]+"|\S+/g;
-    const tokens = [];
+export type SearchJoinOperator = 'and' | 'or';
 
-    let match;
-    while ((match = regex.exec(searchString)) !== null) {
-        tokens.push(match[0]);
+const tokenizeSearchText = (searchText: string): string[] => {
+    const tokens: string[] = [];
+    const tokenPattern = /"([^"]+)"|(\S+)/g;
+    let match: RegExpExecArray | null;
+
+    while ((match = tokenPattern.exec(searchText)) !== null) {
+        const token = (match[1] ?? match[2]).trim();
+        if (token) tokens.push(token);
     }
 
-    // Process each token
-    const queryParts = tokens.map(token => {
-        // Remove quotes for the current token if it's a phrase
-        let processedToken = token.replace(/"/g, '');
-        const encodedToken = encodeURIComponent(processedToken);
-        return searchParameters.map(param => {
-            if (param === 'tr') {
-                const trToken = encodeURIComponent(processedToken.replace(/[^a-zA-Z]/g, ''));
-                return `${param}:"${trToken}"`;
-            }
-            return `${param}:"${encodedToken}"`;
-        }).join('|');
-    });
-
-    // Combine query parts with the specified operator. Enclose each part in parentheses to ensure correct precedence.
-    const combinedQuery = queryParts.map(part => `(${part})`).join(joinOperator);
-
-    // Add the filter options to the query
-    const filterQueries = [];
-    if (filterOptions.origin !== "all") {
-        filterQueries.push(`o:"${filterOptions.origin === "official"}"`);
-    }
-
-    // Final combined query with filters
-    return `input=(${combinedQuery})${filterQueries.length > 0 ? '%26' + filterQueries.join('%26') : ''}`;
+    return tokens;
 };
 
-export const handleSearch = async (query: string, router: NextRouter, origin?: string) => {
-    router.push(`/search?query=${encodeURIComponent(query)}&incomplete=true&origin=${origin}`);
+/**
+ * Builds a Cerebro expression for one term: any free-text field may match, and
+ * traits may match too once punctuation and digits are stripped. Terms with no
+ * letters contribute no trait clause rather than an empty one.
+ */
+const termExpression = (token: string): CerebroExpression => {
+    const clauses: CerebroExpression[] = TEXT_SEARCH_FIELDS.map(field => predicate(field, token));
+    const traitToken = token.replace(/[^\p{L}]/gu, '');
+
+    if (traitToken) clauses.push(predicate('trait', traitToken));
+
+    return any(...clauses);
+};
+
+/**
+ * Serializes a user's search text into a Cerebro query. Values are escaped by
+ * the shared query builder and the official-only predicate is always applied
+ * here, so callers never choose a card origin.
+ */
+export const createSearchQuery = (
+    searchString: string,
+    joinOperator: SearchJoinOperator = 'and',
+): string => {
+    const terms = tokenizeSearchText(searchString).map(termExpression);
+    const combined = joinOperator === 'and' ? all(...terms) : any(...terms);
+
+    return serializeCerebroQuery(all(combined, OFFICIAL_ONLY));
+};
+
+export const handleSearch = (query: string, router: NextRouter) => {
+    return router.push({
+        pathname: '/search',
+        query: { query },
+    });
 };

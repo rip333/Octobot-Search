@@ -18,6 +18,9 @@
     flex-wrap: wrap;
     justify-content: left;
     gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .redButton {
@@ -37,4 +40,9 @@
 
 .redButton:hover {
     background-color: #ed1d24;
+}
+
+.redButton:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
 }

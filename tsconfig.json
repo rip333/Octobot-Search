@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    // Next 16 targets Chrome/Edge/Firefox 111+, Safari 16.4+, so downlevelling
+    // to ES5 only produced larger output for browsers that no longer exist.
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -26,7 +27,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",

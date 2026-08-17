@@ -1,14 +1,21 @@
-// pages/_app.js or pages/_app.tsx
 import '../globals.css';
 import type { AppProps } from 'next/app';
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { Manrope } from 'next/font/google';
+import localFont from 'next/font/local';
 
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-manrope',
+/**
+ * Manrope is checked in rather than pulled from Google Fonts at build time, so
+ * a build never depends on fonts.googleapis.com being reachable.
+ */
+const manrope = localFont({
+    src: '../fonts/Manrope-Variable.woff2',
+    weight: '200 800',
+    style: 'normal',
+    display: 'swap',
+    variable: '--font-manrope',
+    fallback: ['system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -16,7 +23,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <div className={`${manrope.variable} ${manrope.className} font-sans`}>
             <Component {...pageProps} />
             <Analytics />
-            <SpeedInsights/>
+            <SpeedInsights />
         </div>
     );
 }

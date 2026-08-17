@@ -1,62 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { Card } from '../../models/Card';
-import { AsyncImage } from 'loadable-image';
 import styles from './CardImage.module.css';
 
 interface CardImageProps {
   card: Card;
   artificialId?: string;
+  /** Renders the reverse face of a double-sided card when one exists. */
+  showBack?: boolean;
 }
 
-const CardImage: React.FC<CardImageProps> = ({ card, artificialId }) => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [imageDimensions, setImageDimensions] = useState<{ width: number, height: number }>({ width: 365, height: 515 });
+const CEREBRO_IMAGE_BASE_URL = 'https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/';
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    handleResize();
+/** Card stock comes in exactly two orientations; both are known before render. */
+const PORTRAIT = { width: 365, height: 515 };
+const LANDSCAPE = { width: 515, height: 365 };
 
-    window.addEventListener('resize', handleResize);
+/** Schemes are printed landscape. This depends only on card data, never on viewport width. */
+const isLandscape = (card: Card): boolean => card.Type.includes('Scheme');
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+const imageUrl = (card: Card, artificialId: string | undefined, showBack: boolean): string => {
+  if (showBack && card.BackImageUrl) return card.BackImageUrl;
+  if (card.ImageUrl) return card.ImageUrl;
 
-  const getImageUrl = (): string => {
-    if (card.ImageUrl) {
-      return card.ImageUrl;
-    }
-    const imageBaseUrl = "https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/";
-    const id = artificialId || card.Id;
-    return card.Official
-      ? `${imageBaseUrl}official/${id}.jpg`
-      : `${imageBaseUrl}unofficial/${id}.jpg`;
-  };
+  const id = artificialId || card.Id;
+  const folder = card.Official ? 'official' : 'unofficial';
+  return `${CEREBRO_IMAGE_BASE_URL}${folder}/${id}.jpg`;
+};
 
-  const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const img = event.currentTarget;
-    if (card.Type.includes("Scheme")) {
-      const schemeHeight = isMobile ? 259 : 365;
-      const schemeWidth = isMobile ? 365 : 515;
-      setImageDimensions({ width: schemeWidth, height: schemeHeight });
-    } else {
-      const newHeight = 515;
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      const newWidth = newHeight * aspectRatio;
-      setImageDimensions({ width: newWidth, height: newHeight });
-    }
-  };
+const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = false }) => {
+  // Remembering *which* URL failed rather than a bare flag means switching
+  // printings retries the new image instead of inheriting the old failure.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const source = imageUrl(card, artificialId, showBack);
+  const failed = failedUrl === source;
+  const { width, height } = isLandscape(card) ? LANDSCAPE : PORTRAIT;
+  const orientation = isLandscape(card) ? 'landscape' : 'portrait';
+
+  // Intrinsic dimensions are reserved either way, so a failed image does not
+  // reflow everything below it.
+  if (failed) {
+    return (
+      <div className={styles.frame} data-orientation={orientation}>
+        <div className={styles.fallback} role="img" aria-label={`${card.Name} (image unavailable)`}>
+          <span>{card.Name}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.image}>
-      <AsyncImage
-        src={getImageUrl()}
+    <div className={styles.frame} data-orientation={orientation}>
+      <Image
+        className={styles.image}
+        src={source}
         alt={card.Name}
-        onLoad={handleImageLoad}
-        style={{ width: imageDimensions.width, height: imageDimensions.height }}
+        width={width}
+        height={height}
+        sizes={isLandscape(card) ? '(max-width: 768px) 92vw, 515px' : '(max-width: 768px) 45vw, 365px'}
+        onError={() => setFailedUrl(source)}
       />
     </div>
   );

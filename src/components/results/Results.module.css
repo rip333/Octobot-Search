@@ -70,8 +70,22 @@
 }
 
 .resultsList {
-  padding: 0px;
-  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.resultItem {
+  display: flex;
+}
+
+.resultItem a:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: -6px;
+  border-radius: 1.65rem;
 }
 
 /* Utility Buttons - Bottom of page */

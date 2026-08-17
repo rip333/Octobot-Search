@@ -34,5 +34,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/scripts
+
+# credentials
 /gcp-key.json
+/scripts/keys/
+
+# Local outputs from scripts/. The scripts themselves are source-controlled;
+# only what they generate or consume locally is ignored. See scripts/README.md.
+/scripts/card_json/
+/scripts/cards.md
+/scripts/print-files/
+/scripts/output/
+/scripts/*.psd
+/scripts/*.tif
+/scripts/*.tiff
+
+# Obsidian local UI state; keep the vault notes and shared app settings tracked.
+/obsidian/**/.obsidian/workspace.json
+/obsidian/**/.obsidian/workspace-mobile.json

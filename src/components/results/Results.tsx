@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './Results.module.css';
 import { Card } from "../../models/Card";
 import CardImage from "../card-image/CardImage";
 import Link from 'next/link';
 import FilterOptions from '../filters/FilterOptions';
+import { CEREBRO_BASE_URL } from '@/api/cerebro';
+import { CardFilterState, EMPTY_CARD_FILTERS, filterAndSortCards } from '@/utils/cardFilters';
 import { DownloadSimple, Link as LinkIcon } from '@phosphor-icons/react';
 
 interface ResultsProps {
@@ -12,17 +14,30 @@ interface ResultsProps {
     detailsEnabled: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled }) => {
-    const [filteredResults, setFilteredResults] = useState<Card[]>(results);
+/*
+ * Rendering strategy: plain list, no pagination or virtualization.
+ *
+ * Measured against live Cerebro: the largest official set is ~15 cards and the
+ * largest pack (Core Set) is 209 cards / ~220 kB. Every card image lazy-loads,
+ * so off-screen results cost a DOM node and nothing else. Revisit only if real
+ * production usage shows result sizes an order of magnitude larger.
+ */
 
-    // Initial setting, but FilterOptions will immediately run its useEffect and override this.
-    // However, keeping this ensures it's set before FilterOptions resolves if there's any delay.
-    useEffect(() => {
-        setFilteredResults(results);
-    }, [results]);
+const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled }) => {
+    const [filters, setFilters] = useState<CardFilterState>(EMPTY_CARD_FILTERS);
+    const [filteredResultSet, setFilteredResultSet] = useState<Card[]>(results);
+
+    // A new result set clears the old selections explicitly. Sort order is a
+    // stated preference rather than a property of the results, so it survives.
+    if (results !== filteredResultSet) {
+        setFilteredResultSet(results);
+        setFilters(previous => ({ ...EMPTY_CARD_FILTERS, sortBy: previous.sortBy }));
+    }
+
+    const visibleCards = useMemo(() => filterAndSortCards(results, filters), [results, filters]);
 
     const exportResultsAsJson = () => {
-        const dataStr = JSON.stringify(filteredResults, null, 2);
+        const dataStr = JSON.stringify(visibleCards, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
@@ -36,46 +51,47 @@ const Results: React.FC<ResultsProps> = ({ results, cerebroQuery, detailsEnabled
 
     return (
         <div className={styles.resultsContainer}>
-            <FilterOptions results={results} onFilterChange={setFilteredResults} />
+            <FilterOptions results={results} filters={filters} onFiltersChange={setFilters} />
 
-            {/* Results Count */}
-            <div className={styles.resultsCount}>
-                {filteredResults.length} {filteredResults.length === 1 ? 'card' : 'cards'}
+            <div className={styles.resultsCount} role="status">
+                {visibleCards.length} {visibleCards.length === 1 ? 'card' : 'cards'}
             </div>
 
             <ul className={styles.resultsList}>
-                {filteredResults.map((card, index) => (
-                    //return CardImage wrapped in link if detailsEnabled.  Otherwise, just return CardImage
-                    detailsEnabled ? (
-                        <Link key={index} href={`/card/${card.Id}`}>
+                {visibleCards.map(card => (
+                    <li key={card.Id} className={styles.resultItem}>
+                        {detailsEnabled ? (
+                            <Link href={`/card/${card.Id}`} aria-label={card.Name}>
+                                <CardImage card={card} />
+                            </Link>
+                        ) : (
                             <CardImage card={card} />
-                        </Link>
-                    ) : (
-                        <CardImage key={index} card={card} />
-                    )
+                        )}
+                    </li>
                 ))}
             </ul>
 
-            {/* Utility Buttons */}
             <div className={styles.utilityButtons}>
                 <button
                     className={styles.exportButton}
                     onClick={exportResultsAsJson}
                     title="Export filtered results as JSON"
                 >
-                    <DownloadSimple size={20} weight="bold" />
+                    <DownloadSimple size={20} weight="bold" aria-hidden="true" />
                     <span>Export JSON</span>
                 </button>
 
                 {cerebroQuery && (
-                    <button
+                    <a
                         className={styles.apiButton}
-                        onClick={() => window.open(`https://cerebro-beta-bot.herokuapp.com/query?${cerebroQuery}`, '_blank')}
+                        href={`${CEREBRO_BASE_URL}/query?${cerebroQuery}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         title="View API query in new tab"
                     >
-                        <LinkIcon size={20} weight="bold" />
+                        <LinkIcon size={20} weight="bold" aria-hidden="true" />
                         <span>View API</span>
-                    </button>
+                    </a>
                 )}
             </div>
         </div>

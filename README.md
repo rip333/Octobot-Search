@@ -2,60 +2,102 @@
 
 THE OCTOBOT!!
 
-Octobot-Search is a Next.js + TypeScript web app that provides a searchable browser for card data powered by an external Cerebro API. The project includes the web UI, data-extraction tooling, and a couple of Photoshop automation scripts used to generate printed image grids.
+A searchable browser for Marvel Champions cards, built with Next.js and
+TypeScript on top of the Cerebro and Merlin card databases.
 
 ---
 
-## Features
+## Requirements
 
-- Searchable card browser UI built with Next.js + TypeScript
-- Fetches card sets, packs and query results from Cerebro endpoints:
-  - `https://cerebro-beta-bot.herokuapp.com/sets`
-  - `https://cerebro-beta-bot.herokuapp.com/packs`
-  - `https://cerebro-beta-bot.herokuapp.com/query`
-- Static pre-rendering for common routes (Next.js `getStaticProps` / `getStaticPaths`)
-- Tailwind CSS styling
-- Vercel Analytics and Speed Insights integrated
-- Small utility Python script to generate hero IDs JSON
-- Photoshop automation scripts to assemble image grids for printing
+- Node.js 20 or newer (CI runs 22.x)
+- npm
 
----
+No environment variables are required. Both upstream APIs are public and their
+base URLs are constants in `src/api/cerebro.ts` and `src/api/merlin.ts`, so a
+fresh clone runs with no configuration.
 
-## Tech stack
+## Install and run
 
-- Next.js (pages directory)
-- React + TypeScript
-- Tailwind CSS
-- Axios for HTTP requests
-- Vercel Analytics & Speed Insights
-- Python (utility scripts)
-- Photoshop scripting (ExtendScript / .js for Photoshop)
+```bash
+npm install
+npm run dev        # http://localhost:3000
+```
 
----
+## Commands
 
-## Data scripts
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build (generates the homepage against live Cerebro) |
+| `npm start` | Serve a production build |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint 9 flat config |
+| `npm test` | Vitest, single run |
 
-- src/data/extract-hero-ids.py
-  - A Python script that fetches hero data and writes `heroes.json`.
-  - Run with Python 3: `python src/data/extract-hero-ids.py`
-  - Inspect the script to adjust the API URL or output filename.
+Before opening a pull request, run the same four checks CI does:
 
----
+```bash
+npm run typecheck && npm run lint && npm test && npm run build
+npm audit --omit=dev --audit-level=info
+```
 
-## Photoshop scripts
+## Deployment
 
-Located in `scripts/`:
+Vercel is the only supported deployment target, and the Vercel Git integration
+owns it. GitHub Actions runs verification only — it never publishes. GitHub
+Pages is not supported: the app needs a Node server for ISR, on-demand routes,
+and the API route that loads community sets.
 
-- `champions-grid-*-fronts.js` and `champions-grid-*-backs.js` are ExtendScript/Photoshop automation scripts. They:
-  - Prompt to select a folder of PNGs
-  - Open a base PSD and lay out images in a grid for printing
-  - Create a `print-files` output folder next to the selected images
-- Usage:
-  - Load the script into Photoshop's Scripts or run via File > Scripts > Browse...
-  - Ensure the `baseFile` path inside the script points to a valid base PSD, or modify it to your local path.
+## Failure behavior
 
----
+The rule everywhere is that a transient outage must never be cached as content.
+
+- **Card and collection pages.** A card that Cerebro does not have returns
+  `notFound` with a 15-minute revalidate, so a newly published card becomes
+  reachable without a redeploy. An unreachable or unusable upstream throws
+  `UpstreamUnavailableError` instead of returning props, which makes Next keep
+  serving the last successfully generated page and retry on the next request.
+  When no page was ever generated, visitors get `pages/500.tsx`.
+- **Homepage.** Sets and packs are fetched independently. If one fails, the
+  other still renders and the page carries a notice plus a 2-minute revalidate.
+  Only a total failure throws.
+- **Community sets.** Loaded on demand from `/api/browse/unofficial` when the
+  unofficial view is opened, so the default homepage never pays for them. A
+  partial source failure still returns what is available.
+- **Search.** Distinguishes aborted, failed, and genuinely empty results, and
+  offers a retry on failure. A late response from a superseded search is
+  discarded rather than overwriting a newer one.
+- **Builds.** `npm run build` renders the homepage against live Cerebro. If
+  Cerebro is completely unreachable the build fails on purpose, rather than
+  publishing an empty homepage.
+
+## Architecture notes
+
+All external HTTP goes through `src/api/`, which centralises base URLs,
+timeouts, response-size limits, jittered retries, response validation, and the
+`success | empty | unavailable | invalid` result model. Cerebro query strings
+are built only by `src/api/cerebroQuery.ts`; route parameters are validated by
+`src/api/routeParams.ts` before any upstream call. See `CONTEXT.md` for the
+module-by-module map.
+
+Search is intentionally limited to official Cerebro cards. Creator Drive
+Libraries are disabled; restoration requirements are documented in
+`src/pages/creators/[id].tsx`.
+
+## Scripts
+
+Local print and data automation lives in `scripts/` — see
+[`scripts/README.md`](scripts/README.md) for ImageMagick and Photoshop usage,
+and for which generated artifacts are source-controlled.
+
+`src/data/extract-hero-ids.py` refreshes `src/data/heroes.json` from Cerebro.
+It needs Python 3.9+ and `requests`:
+
+```bash
+pip install requests
+python src/data/extract-hero-ids.py
+```
 
 ## Contact
 
-Project maintained by Rip Britton (rip333). See the `/rip` page in the app for personal links and additional contact info.
+Maintained by Rip Britton (rip333). See the `/rip` page in the app for links.

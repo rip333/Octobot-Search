@@ -51,3 +51,9 @@
     max-width: 300px;
   }
 }
+/* Visible keyboard focus for the search field and its submit button. */
+.searchbox input:focus-visible,
+.searchButton:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}

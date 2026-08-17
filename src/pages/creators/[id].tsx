@@ -1,49 +1,28 @@
-import React from 'react';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import Header from '@/components/header/Header';
-import Footer from '@/components/footer/Footer';
-import { DriveExplorer } from '@/components/drive/DriveExplorer';
-import styles from '@/styles/Profile.module.css';
-import { getCreatorByNameOrId, extractDriveFolderId } from '@/data/creators';
+import type { GetServerSideProps } from 'next';
 
-export default function CreatorDrivePage() {
-  const router = useRouter();
-  const { id } = router.query;
-
-  const paramId = (typeof id === 'string' && id) ? id : '';
-  const creator = paramId ? getCreatorByNameOrId(paramId) : undefined;
-
-  const folderId = creator ? creator.driveFolderId : extractDriveFolderId(paramId);
-  const name = creator ? creator.name : 'Creator Content';
-
-  return (
-    <>
-      <Head>
-        <title>{name} - Octobot Search</title>
-        <meta
-          name="description"
-          content={`Explore content shared by ${name}`}
-        />
-      </Head>
-
-      <Header miniLogo={true} />
-
-      <main className={styles.profileContainer}>
-        {folderId ? (
-          <DriveExplorer
-            initialFolderId={folderId}
-            title={name}
-            allowUrlInput={false}
-          />
-        ) : (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#aaa' }}>
-            Loading creator content...
-          </div>
-        )}
-      </main>
-
-      <Footer />
-    </>
-  );
+/**
+ * Creator Drive pages are intentionally disabled and return 404.
+ *
+ * TODO before restoring this page:
+ * - Define whether access is limited to curated public creator roots or may
+ *   include private folders shared with the service account.
+ * - Keep an allowlist of approved root folder IDs on the server and verify
+ *   that every navigated child remains a descendant of its approved root.
+ * - Accept only canonical Google Drive folder IDs; never interpolate raw route
+ *   or query-string input into a Google Drive search expression.
+ * - Add authentication if any non-public content is supported, plus per-client
+ *   rate limiting, response caching, request timeouts, and audit logging.
+ * - Paginate Drive results instead of silently truncating folders at 1,000
+ *   items, and validate Google responses before returning them to the client.
+ * - Return generic client errors while retaining detailed server-side logs;
+ *   never expose credential or upstream exception details.
+ * - Add abortable client requests, accessible keyboard controls/modal focus
+ *   management, and tests for authorization, traversal, and invalid IDs.
+ */
+export default function DisabledCreatorDrivePage() {
+  return null;
 }
+
+export const getServerSideProps: GetServerSideProps = async () => ({
+  notFound: true,
+});

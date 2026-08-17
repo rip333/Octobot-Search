@@ -1,8 +1,63 @@
-.image {
+/*
+ * Sizing is entirely CSS: the frame reserves the correct aspect ratio before
+ * the image loads, and never exceeds the width available to it. No resize
+ * listener and no dimension state are involved.
+ */
+.frame {
     display: inline-block;
+    padding: 12px;
+    max-width: 100%;
 }
 
-.image img{
-    padding: 12px;
+.frame[data-orientation="portrait"] {
+    width: 365px;
+}
+
+.frame[data-orientation="landscape"] {
+    width: 515px;
+}
+
+.image {
+    display: block;
+    width: 100%;
+    height: auto;
     border-radius: 1.65rem;
+}
+
+.frame[data-orientation="portrait"] .image,
+.frame[data-orientation="portrait"] .fallback {
+    aspect-ratio: 365 / 515;
+}
+
+.frame[data-orientation="landscape"] .image,
+.frame[data-orientation="landscape"] .fallback {
+    aspect-ratio: 515 / 365;
+}
+
+.fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem;
+    border: 1px dashed rgba(255, 255, 255, 0.35);
+    border-radius: 1.65rem;
+    background: rgba(0, 0, 0, 0.35);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .frame {
+        padding: 6px;
+    }
+
+    .frame[data-orientation="portrait"] {
+        width: 45vw;
+    }
+
+    .frame[data-orientation="landscape"] {
+        width: 92vw;
+    }
 }

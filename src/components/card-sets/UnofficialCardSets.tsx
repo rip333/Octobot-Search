@@ -2,85 +2,42 @@ import React from 'react';
 import styles from "./CardSets.module.css";
 import sharedStyles from "../../styles/Shared.module.css";
 import Link from 'next/link';
-import { CardSet } from "../../models/CardSet";
-import { MerlinPack } from "../../models/MerlinPack";
-
-import { merlinPackToCardSet } from '@/merlin-adapter';
-import { getCreators } from '@/data/creators';
+import { UnofficialCardSet } from "../../models/CardSet";
+import { compareCardSets } from '@/utils/cardCollections';
 
 interface UnofficialCardSetsProps {
-    unofficialCerebroSets: CardSet[];
-    merlinPacks: MerlinPack[];
+    /** Already resolved to a browse route by `/api/browse/unofficial`. */
+    sets: UnofficialCardSet[];
 }
 
-const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ unofficialCerebroSets, merlinPacks }) => {
-    const creators = getCreators();
-
-    // Convert Merlin packs to CardSets and mark their source
-    const adaptedMerlinSets = merlinPacks.map(pack => ({
-        ...merlinPackToCardSet(pack),
-        Source: 'ms' as const
-    }));
-
-    const adaptedCerebroSets = unofficialCerebroSets.map(set => ({
-        ...set,
-        Source: 'usi' as const
-    }));
-
-    // Combine and sort
-    const allCustomSets = [...adaptedMerlinSets, ...adaptedCerebroSets].sort((a, b) => {
-        if (a.Type !== b.Type) return a.Type.localeCompare(b.Type);
-        return a.Name.localeCompare(b.Name);
-    });
-
-    // Group by type
-    const types = Array.from(new Set(allCustomSets.map(s => s.Type)));
-    const typeOrder = ["Hero Set", "Villain Set", "Modular Set", "Nemesis Set", "Campaign Set", "Supplementary Set", "Core"];
-
-    types.sort((a, b) => {
-        const indexA = typeOrder.indexOf(a);
-        const indexB = typeOrder.indexOf(b);
-        if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        return indexA - indexB;
-    });
+const UnofficialCardSets: React.FC<UnofficialCardSetsProps> = ({ sets }) => {
+    const sortedSets = [...sets].sort(compareCardSets);
+    const types = Array.from(new Set(sortedSets.map(set => set.Type)));
 
     return (
         <div className={sharedStyles.sectionContainer}>
-            {creators.length > 0 && (
-                <div className={styles.typeSection}>
-                    <h3>Creator Drive Libraries</h3>
-                    <div className={sharedStyles.buttonGrid}>
-                        {creators.map(creator => (
-                            <Link
-                                href={`/creators/${encodeURIComponent(creator.id || creator.name)}`}
-                                key={creator.id || creator.name}
-                                className={sharedStyles.redButton}
-                                role="button"
-                            >
-                                {creator.name}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/*
+              Creator Drive Libraries are intentionally disabled. The public
+              page and API must remain unavailable until the authorization,
+              validation, pagination, caching, and rate-limit work documented
+              in pages/creators/[id].tsx is complete.
+            */}
             {types.map(type => (
-                <div key={type} className={styles.typeSection}>
+                <section key={type} className={styles.typeSection}>
                     <h3>{type}</h3>
-                    <div className={sharedStyles.buttonGrid}>
-                        {allCustomSets.filter(set => set.Type === type).map(set => (
-                            <Link
-                                href={`/cards/${set.Source}/${set.Id}`}
-                                key={`${set.Source}-${set.Id}`}
-                                className={sharedStyles.redButton}
-                                role="button"
-                            >
-                                {set.Name}
-                            </Link>
+                    <ul className={sharedStyles.buttonGrid}>
+                        {sortedSets.filter(set => set.Type === type).map(set => (
+                            <li key={`${set.Source}-${set.Id}`}>
+                                <Link
+                                    href={`/cards/${set.Source}/${set.Id}`}
+                                    className={sharedStyles.redButton}
+                                >
+                                    {set.Name}
+                                </Link>
+                            </li>
                         ))}
-                    </div>
-                </div>
+                    </ul>
+                </section>
             ))}
         </div>
     );

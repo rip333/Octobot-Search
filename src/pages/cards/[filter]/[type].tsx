@@ -1,22 +1,28 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import axios from "axios";
+import { ParsedUrlQuery } from 'querystring';
 import { Card } from "@/models/Card";
 import Results from "@/components/results/Results";
 import Header from '@/components/header/Header';
 import Footer from '@/components/footer/Footer';
-import { ParsedUrlQuery } from 'querystring';
-import Loading from '@/components/loading/Loading';
-import { fetchMerlinCards } from '@/merlin-api';
-import { merlinCardToCard } from '@/merlin-adapter';
+import NoResults from '@/components/no-results/NoResults';
+import PageMeta from '@/components/page-meta/PageMeta';
 import SearchBar from '@/components/search-bar/SearchBar';
-import { fetcherWithRetry } from '@/utils/fetcher';
+
+import { fetchCerebroCards } from '@/api/cerebro';
+import { officialFieldQuery } from '@/api/cerebroQuery';
+import { fetchMerlinCards } from '@/api/merlin';
+import { BrowseFilter, parseBrowseRoute } from '@/api/routeParams';
+import {
+  CONTENT_REVALIDATE_SECONDS,
+  NOT_FOUND_REVALIDATE_SECONDS,
+  UpstreamUnavailableError,
+} from '@/api/revalidate';
+import { UpstreamResult } from '@/api/result';
+import { merlinCardToCard } from '@/merlin-adapter';
 
 interface PageProps {
   cards: Card[];
-  loading: boolean;
-  error: boolean;
-  cerebroQuery?: string;
-  origin?: string;
+  cerebroQuery: string | null;
   detailsEnabled: boolean;
 }
 
@@ -25,82 +31,79 @@ interface Params extends ParsedUrlQuery {
   type: string;
 }
 
-const Page: React.FC<PageProps> = ({ cards, loading, error, cerebroQuery, detailsEnabled }) => {
-  if (error) {
-    console.error('Error fetching cards');
+const Page: React.FC<PageProps> = ({ cards, cerebroQuery, detailsEnabled }) => (
+  <div>
+    <PageMeta
+      title="Browse cards"
+      description={`${cards.length} cards in this collection.`}
+    />
+    <Header miniLogo={true} />
+    <SearchBar />
+    <main>
+      {cards.length > 0
+        ? <Results results={cards} cerebroQuery={cerebroQuery ?? undefined} detailsEnabled={detailsEnabled} />
+        : <NoResults />}
+    </main>
+    <Footer />
+  </div>
+);
+
+export const getStaticPaths: GetStaticPaths<Params> = async () => ({
+  // No path is worth pre-rendering: collection IDs change every release and a
+  // stale hardcoded entry only wastes build time. Everything is on demand.
+  paths: [],
+  fallback: 'blocking',
+});
+
+/** Cerebro-backed collections support card detail pages; Merlin cards do not. */
+const detailsEnabledFor = (filter: BrowseFilter): boolean => filter === 'si' || filter === 'pi';
+
+const fetchCollection = async (
+  filter: BrowseFilter,
+  type: string,
+): Promise<{ result: UpstreamResult<Card[]>; cerebroQuery: string | null }> => {
+  if (filter === 'ms') {
+    const merlinResult = await fetchMerlinCards(type);
+    const result: UpstreamResult<Card[]> = merlinResult.status === 'success'
+      ? { status: 'success', data: merlinResult.data.map(merlinCardToCard) }
+      : merlinResult;
+
+    return { result, cerebroQuery: null };
   }
 
-  return (
-    <div>
-      <Header miniLogo={true} />
-      <SearchBar />
-      {loading && <Loading />}
-      {!loading && <Results results={cards || []} cerebroQuery={cerebroQuery} detailsEnabled={detailsEnabled} />}
-      <Footer />
-    </div>
-  );
-};
+  const field = filter === 'pi' ? 'packId' : 'setId';
+  const cerebroQuery = officialFieldQuery(field, type, filter !== 'usi');
 
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  // Define paths for pre-rendering
-  const paths = [
-    { params: { filter: 'si', type: 'core' } },
-  ];
-
-  return {
-    paths,
-    fallback: 'blocking', // Enable blocking fallback for dynamic routes
-  };
+  return { result: await fetchCerebroCards(cerebroQuery), cerebroQuery };
 };
 
 export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
-  const { filter, type } = params!;
+  const route = parseBrowseRoute(params?.filter, params?.type);
 
-  try {
-    let cards: Card[] = [];
-    let query = "";
-    let origin = "official";
+  // Unsupported filter or malformed collection ID: never reaches an upstream.
+  if (!route) {
+    return { notFound: true, revalidate: NOT_FOUND_REVALIDATE_SECONDS };
+  }
 
-    if (filter === "ms") {
-      // Merlin Set
-      const merlinCards = await fetchMerlinCards(type);
-      cards = merlinCards.map(merlinCardToCard);
-      origin = "unofficial"; // Or "merlin" if we add that to Header
-    } else if (filter === "usi") {
-      // Unofficial Cerebro Set
-      query = `input=(si:"${type}"%26o:"false")`;
-      cards = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
-      origin = "unofficial";
-    } else {
-      // Default (Cerebro Official)
-      query = `input=(${filter}:"${type}"%26o:"true")`;
-      cards = await fetcherWithRetry(`https://cerebro-beta-bot.herokuapp.com/query?${query}`);
-      origin = "official";
-    }
+  const { result, cerebroQuery } = await fetchCollection(route.filter, route.type);
 
+  if (result.status === 'success') {
     return {
       props: {
-        cards,
-        loading: false,
-        error: false,
-        cerebroQuery: query,
-        origin,
-        detailsEnabled: filter != "ms" && filter != "usi",
+        cards: result.data,
+        cerebroQuery,
+        detailsEnabled: detailsEnabledFor(route.filter),
       },
-      revalidate: 604800, // Revalidate every week
-    };
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return {
-      props: {
-        cards: [],
-        loading: false,
-        error: true,
-        detailsEnabled: false,
-      },
-      revalidate: 604800, // Revalidate every week
+      revalidate: CONTENT_REVALIDATE_SECONDS,
     };
   }
-}
+
+  // A collection that genuinely holds no cards is not a page worth caching.
+  if (result.status === 'empty') {
+    return { notFound: true, revalidate: NOT_FOUND_REVALIDATE_SECONDS };
+  }
+
+  throw new UpstreamUnavailableError(result.reason);
+};
 
 export default Page;

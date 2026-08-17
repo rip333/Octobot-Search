@@ -1,78 +1,163 @@
 // pages/search.tsx
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/models/Card';
 import Results from '@/components/results/Results';
 import Header from '@/components/header/Header';
-import axios from "axios";
 import { createSearchQuery } from '@/searchUtils';
 import NoResults from '@/components/no-results/NoResults';
 import Loading from '@/components/loading/Loading';
 import Footer from '@/components/footer/Footer';
+import PageMeta from '@/components/page-meta/PageMeta';
 import SearchBar from '@/components/search-bar/SearchBar';
+import { fetchCerebroCards } from '@/api/cerebro';
+import { isUpstreamFailure } from '@/api/result';
+
+type SearchStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
+
+interface SearchState {
+    status: SearchStatus;
+    results: Card[];
+    cerebroQuery: string;
+    isFallback: boolean;
+    errorMessage?: string;
+}
+
+const INITIAL_SEARCH_STATE: SearchState = {
+    status: 'idle',
+    results: [],
+    cerebroQuery: '',
+    isFallback: false,
+};
+
+const FAILURE_STATE: SearchState = {
+    status: 'error',
+    results: [],
+    cerebroQuery: '',
+    isFallback: false,
+    errorMessage: 'Search is temporarily unavailable. Please try again.',
+};
 
 const Search: React.FC = () => {
     const router = useRouter();
-    const [searchResults, setSearchResults] = useState<Card[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [cerebroQuery, setCerebroQuery] = useState<string>('');
-    const [isFallback, setIsFallback] = useState<boolean>(false);
+    const [searchState, setSearchState] = useState<SearchState>(INITIAL_SEARCH_STATE);
+    const [retryCount, setRetryCount] = useState(0);
+    const activeRequestId = useRef(0);
+    const searchText = typeof router.query.query === 'string' ? router.query.query.trim() : '';
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            setIsFallback(false);
+        if (!router.isReady) return;
 
-            if (router.query.query) {
-                try {
-                    let searchQueryAnd = createSearchQuery(router.query.query as string, { origin: 'official' }, '%26');
-                    setCerebroQuery(searchQueryAnd);
-                    let results = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?${searchQueryAnd}`);
-                    
-                    if (results?.data && Array.isArray(results.data) && results.data.length > 0) {
-                        setSearchResults(results.data.reverse());
-                        setLoading(false);
-                        return;
-                    }
-                } catch (error) {
-                    console.log('AND query failed or returned no results, falling back to OR query');
+        const abortController = new AbortController();
+        const requestId = ++activeRequestId.current;
+        const requestIsActive = () =>
+            !abortController.signal.aborted && activeRequestId.current === requestId;
+
+        const runSearch = async () => {
+            if (!searchText) {
+                if (requestIsActive()) setSearchState(INITIAL_SEARCH_STATE);
+                return;
+            }
+
+            setSearchState({
+                status: 'loading',
+                results: [],
+                cerebroQuery: '',
+                isFallback: false,
+            });
+
+            try {
+                const exactQuery = createSearchQuery(searchText, 'and');
+                const exactResult = await fetchCerebroCards(exactQuery, abortController.signal);
+                if (!requestIsActive()) return;
+
+                if (isUpstreamFailure(exactResult)) {
+                    console.error(`Cerebro search failed (${exactResult.reason}).`);
+                    setSearchState(FAILURE_STATE);
+                    return;
                 }
 
-                // Fallback to OR query if AND query returns 0 results or throws error (like 404)
-                try {
-                    let searchQueryOr = createSearchQuery(router.query.query as string, { origin: 'official' }, '|');
-                    setCerebroQuery(searchQueryOr);
-                    let fallbackResults = await axios.get(`https://cerebro-beta-bot.herokuapp.com/query?${searchQueryOr}`);
-                    setSearchResults(fallbackResults?.data && Array.isArray(fallbackResults.data) ? fallbackResults.data.reverse() : []);
-                    setIsFallback(true);
-                } catch (error) {
-                    console.error('Error fetching fallback search results:', error);
-                    setSearchResults([]);
-                } finally {
-                    setLoading(false);
+                if (exactResult.status === 'success') {
+                    setSearchState({
+                        status: 'success',
+                        results: [...exactResult.data].reverse(),
+                        cerebroQuery: exactQuery,
+                        isFallback: false,
+                    });
+                    return;
                 }
-            } else {
-                setLoading(false);
+
+                // Exact match found nothing; widen to a partial match.
+                const fallbackQuery = createSearchQuery(searchText, 'or');
+                const fallbackResult = await fetchCerebroCards(fallbackQuery, abortController.signal);
+                if (!requestIsActive()) return;
+
+                if (isUpstreamFailure(fallbackResult)) {
+                    console.error(`Cerebro fallback search failed (${fallbackResult.reason}).`);
+                    setSearchState(FAILURE_STATE);
+                    return;
+                }
+
+                const found = fallbackResult.status === 'success' ? fallbackResult.data : [];
+                setSearchState({
+                    status: found.length > 0 ? 'success' : 'empty',
+                    results: [...found].reverse(),
+                    cerebroQuery: fallbackQuery,
+                    isFallback: found.length > 0,
+                });
+            } catch (error) {
+                // Only aborts reach here; every upstream problem is a typed result.
+                if (!requestIsActive()) return;
+
+                const errorSummary = error instanceof Error ? `${error.name}: ${error.message}` : 'Unknown error';
+                console.error(`Cerebro search request failed (${errorSummary}).`);
+                setSearchState(FAILURE_STATE);
             }
         };
 
-        fetchData();
-    }, [router.query.query]);
+        void runSearch();
+        return () => {
+            abortController.abort();
+            if (activeRequestId.current === requestId) activeRequestId.current += 1;
+        };
+    }, [router.isReady, retryCount, searchText]);
+
+    const { status, results, cerebroQuery, isFallback, errorMessage } = searchState;
 
     return (
         <div>
+            <PageMeta
+                title={searchText ? `Search: ${searchText}` : 'Search'}
+                description="Search official Marvel Champions cards by name, rules text, or trait."
+                noIndex
+            />
             <Header miniLogo={true} />
             <SearchBar />
-            {loading && <Loading />}
-            {!loading && isFallback && searchResults.length > 0 && (
-                <div className="flex justify-center mt-4 mb-2 px-4">
-                    <p className="text-yellow-400 bg-gray-800/80 px-4 py-2 rounded-lg text-sm font-medium border border-yellow-500/30">
-                        No exact matches found. Showing partial matches instead.
+            <main>
+                {status === 'idle' && (
+                    <p className="text-center px-4 py-8 text-white">
+                        Enter a card name, rules text, or trait to search.
                     </p>
-                </div>
-            )}
-            {!loading && <Results results={searchResults} cerebroQuery={cerebroQuery} detailsEnabled={true} />}
-            {searchResults.length === 0 && !loading && <NoResults />}
+                )}
+                {status === 'loading' && <Loading />}
+                {status === 'success' && isFallback && (
+                    <div className="flex justify-center mt-4 mb-2 px-4">
+                        <p role="status" className="text-yellow-400 bg-gray-800/80 px-4 py-2 rounded-lg text-sm font-medium border border-yellow-500/30">
+                            No exact matches found. Showing partial matches instead.
+                        </p>
+                    </div>
+                )}
+                {status === 'success' && (
+                    <Results results={results} cerebroQuery={cerebroQuery} detailsEnabled={true} />
+                )}
+                {status === 'empty' && <NoResults />}
+                {status === 'error' && (
+                    <div role="alert" className="flex flex-col items-center gap-3 px-4 py-8 text-white">
+                        <p>{errorMessage}</p>
+                        <button type="button" onClick={() => setRetryCount(count => count + 1)}>Try again</button>
+                    </div>
+                )}
+            </main>
             <Footer />
         </div>
     );
