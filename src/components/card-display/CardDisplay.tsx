@@ -61,7 +61,7 @@ const CardDisplay: React.FC<CardProps> = ({ card }) => {
             )}
             <div className={styles.cardDisplay}>
                 <div className={styles.leftContent}>
-                    <CardImage card={card} artificialId={selectedPrinting?.ArtificialId ?? card.Id} />
+                    <CardImage card={card} artificialId={selectedPrinting?.ArtificialId ?? card.Id} priority />
                     {card.BackImageUrl && (
                         <CardImage card={card} artificialId={selectedPrinting?.ArtificialId ?? card.Id} showBack />
                     )}

@@ -128,3 +128,17 @@ describe('CardImage main scheme stage sides', () => {
     expect(source()).toContain('07018.jpg');
   });
 });
+
+describe('CardImage loading priority', () => {
+  it('is not deferred when marked as the priority image', () => {
+    render(<CardImage card={makeCard()} artificialId="0001" priority />);
+
+    expect(image()!.getAttribute('loading')).not.toBe('lazy');
+  });
+
+  it('stays lazy by default, so grids do not race the priority image', () => {
+    render(<CardImage card={makeCard()} artificialId="0001" />);
+
+    expect(image()!.getAttribute('loading')).toBe('lazy');
+  });
+});

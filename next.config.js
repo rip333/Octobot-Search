@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true,
     // Card art is served from the two upstream card databases only.
     remotePatterns: [
       {

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Footer from '@/components/footer/Footer';
 import PageMeta from '@/components/page-meta/PageMeta';
 import styles from '@/styles/Profile.module.css';
-import textLogo from "../icon-text.png";
+import textLogo from "../icon-text.webp";
 
 const MERLIN_IMAGE_ORIGIN = 'https://mc4db.merlindumesnil.net';
 

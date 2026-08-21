@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Header.module.css';
-import logo from '../../logo.png';
-import textLogo from "../../icon-text.png";
+import logo from '../../logo.webp';
+import textLogo from "../../icon-text.webp";
 import Link from 'next/link';
 import Image from 'next/image';
 

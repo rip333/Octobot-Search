@@ -8,6 +8,7 @@ interface CardImageProps {
   artificialId?: string;
   /** Renders the reverse face of a double-sided card when one exists. */
   showBack?: boolean;
+  priority?: boolean;
 }
 
 const CEREBRO_IMAGE_BASE_URL = 'https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/';
@@ -39,7 +40,7 @@ const imageUrl = (card: Card, artificialId: string | undefined, showBack: boolea
   return `${CEREBRO_IMAGE_BASE_URL}${folder}/${id}.jpg`;
 };
 
-const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = false }) => {
+const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = false, priority = false }) => {
   // Remembering *which* URL failed rather than a bare flag means switching
   // printings retries the new image instead of inheriting the old failure.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
@@ -69,6 +70,7 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = fa
         width={width}
         height={height}
         sizes={isLandscape(card) ? '(max-width: 768px) 92vw, 515px' : '(max-width: 768px) 45vw, 365px'}
+        priority={priority}
         onError={() => setFailedUrl(source)}
       />
     </div>
