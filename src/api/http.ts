@@ -5,6 +5,8 @@ import { UpstreamResult } from './result';
 export const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 
 const DEFAULT_TIMEOUT_MS = 12_000;
+/** Half the deployed 10s limit, reserving time for startup, parsing and rendering. */
+export const SERVER_UPSTREAM_BUDGET_MS = 5_000;
 const DEFAULT_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 300;
 const RETRY_MAX_DELAY_MS = 4_000;
@@ -29,6 +31,8 @@ export interface UpstreamRequestOptions {
   url: string;
   signal?: AbortSignal;
   timeoutMs?: number;
+  /** Total wall-clock budget including all attempts and retry backoff. */
+  totalTimeoutMs?: number;
   maxResponseBytes?: number;
   retries?: number;
   headers?: Record<string, string>;
@@ -57,7 +61,22 @@ const retryDelayMs = (attempt: number): number => {
   return Math.random() * ceiling;
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number, signal: AbortSignal) => new Promise<void>((resolve, reject) => {
+  if (signal.aborted) {
+    reject(signal.reason);
+    return;
+  }
+  const timer = setTimeout(() => {
+    signal.removeEventListener('abort', onAbort);
+    resolve();
+  }, ms);
+  const onAbort = () => {
+    clearTimeout(timer);
+    signal.removeEventListener('abort', onAbort);
+    reject(signal.reason);
+  };
+  signal.addEventListener('abort', onAbort, { once: true });
+});
 
 const describeError = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
@@ -81,8 +100,9 @@ export const requestJson = async (
   const {
     endpoint,
     url,
-    signal,
+    signal: callerSignal,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    totalTimeoutMs = typeof window === 'undefined' ? SERVER_UPSTREAM_BUDGET_MS : Infinity,
     maxResponseBytes = MAX_RESPONSE_BYTES,
     retries = DEFAULT_RETRIES,
     headers,
@@ -91,47 +111,88 @@ export const requestJson = async (
 
   const requestId = newRequestId();
   const attempts = Math.max(1, retries);
+  const started = performance.now();
+  const controller = new AbortController();
+  const forwardAbort = () => controller.abort(callerSignal?.reason);
+  callerSignal?.addEventListener('abort', forwardAbort, { once: true });
+  if (callerSignal?.aborted) forwardAbort();
+  let deadlineExceeded = false;
+  const timer = Number.isFinite(totalTimeoutMs) ? setTimeout(() => {
+    deadlineExceeded = true;
+    controller.abort();
+  }, totalTimeoutMs) : undefined;
+  const signal = controller.signal;
+  let outcome = 'unavailable';
+  let attemptCount = 0;
+  let upstreamMs = 0;
   let lastError: unknown;
 
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    try {
-      const response = await axios.get<unknown>(url, {
-        signal,
-        timeout: timeoutMs,
-        maxContentLength: maxResponseBytes,
-        maxBodyLength: maxResponseBytes,
-        headers,
-        responseType: 'json',
-        // Adapter preference, in order of what enforces `maxContentLength`.
-        // Axios picks the first one supported by the runtime: `http` on the
-        // server, `fetch` in the browser. The default browser adapter is `xhr`,
-        // which silently ignores the limit, so it is listed last as a
-        // compatibility fallback for runtimes without fetch.
-        adapter: ['http', 'fetch', 'xhr'],
-      });
-
-      return { status: 'success', data: response.data };
-    } catch (error) {
-      if (isAbortError(error)) throw error;
-      lastError = error;
-
-      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-      if (typeof status === 'number' && emptyStatuses.includes(status)) {
-        return { status: 'empty' };
+  try {
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      signal.throwIfAborted();
+      const remainingMs = totalTimeoutMs - (performance.now() - started);
+      if (remainingMs <= 0) {
+        deadlineExceeded = true;
+        break;
       }
+      const attemptStarted = performance.now();
+      attemptCount++;
+      let delay: number | undefined;
+      try {
+        const response = await axios.get<unknown>(url, {
+          signal,
+          timeout: Math.min(timeoutMs, Math.ceil(remainingMs)),
+          maxContentLength: maxResponseBytes,
+          maxBodyLength: maxResponseBytes,
+          headers,
+          responseType: 'json',
+          // Prefer adapters that enforce maxContentLength. Browser xhr is
+          // only a compatibility fallback because it ignores this limit.
+          adapter: ['http', 'fetch', 'xhr'],
+        });
 
-      const canRetry = isRetryable(error) && attempt < attempts - 1;
-      if (!canRetry) break;
+        outcome = 'success';
+        return { status: 'success', data: response.data };
+      } catch (error) {
+        if (callerSignal?.aborted) throw error;
+        if (deadlineExceeded) break;
+        if (isAbortError(error)) throw error;
+        lastError = error;
 
-      const delay = retryDelayMs(attempt);
-      console.warn(
-        `[upstream ${endpoint} ${requestId}] ${describeError(error)}; retry ${attempt + 1}/${attempts - 1} in ${Math.round(delay)}ms`,
-      );
-      await sleep(delay);
+        const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+        if (typeof status === 'number' && emptyStatuses.includes(status)) {
+          outcome = 'empty';
+          return { status: 'empty' };
+        }
+
+        const canRetry = isRetryable(error) && attempt < attempts - 1;
+        if (!canRetry) break;
+
+        delay = retryDelayMs(attempt);
+        console.warn(
+          `[upstream ${endpoint} ${requestId}] ${describeError(error)}; attempt_ms=${Math.round(performance.now() - attemptStarted)}; retry ${attempt + 1}/${attempts - 1} in ${Math.round(delay)}ms`,
+        );
+      } finally {
+        upstreamMs += performance.now() - attemptStarted;
+      }
+      if (delay !== undefined) await sleep(delay, signal);
+    }
+
+    const reason = deadlineExceeded ? 'deadline exceeded' : describeError(lastError);
+    console.error(`[upstream ${endpoint} ${requestId}] failed after ${attemptCount} attempt(s): ${reason}`);
+    return { status: 'unavailable', reason: `${endpoint}: ${reason}` };
+  } catch (error) {
+    if (deadlineExceeded && !callerSignal?.aborted) {
+      console.error(`[upstream ${endpoint} ${requestId}] failed after ${attemptCount} attempt(s): deadline exceeded`);
+      return { status: 'unavailable', reason: `${endpoint}: deadline exceeded` };
+    }
+    outcome = 'cancelled';
+    throw error;
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    callerSignal?.removeEventListener('abort', forwardAbort);
+    if (typeof window === 'undefined') {
+      console.info(`[upstream ${endpoint} ${requestId}] outcome=${outcome} duration_ms=${Math.round(performance.now() - started)} upstream_ms=${Math.round(upstreamMs)} attempts=${attemptCount}`);
     }
   }
-
-  const reason = describeError(lastError);
-  console.error(`[upstream ${endpoint} ${requestId}] failed after ${attempts} attempt(s): ${reason}`);
-  return { status: 'unavailable', reason: `${endpoint}: ${reason}` };
 };

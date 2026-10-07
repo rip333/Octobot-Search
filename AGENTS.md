@@ -67,8 +67,34 @@ updates unless the user also asks for planning, capture, or reconciliation.
 - `obsidian/Octobot-Search/`: rationale, decisions, priorities, verified state, history, and open
   questions.
 - `CONTEXT.md`: current technical map and cross-module contracts.
+- `OPERATIONS.md`: production references, deployment flow, safe read-only retrieval, metric
+  definitions, and the access still missing. Reference only; it is not a second backlog.
+- `AUDIT_REPORT.md`: dated findings from a documentation audit. Proposals in it are not decisions.
 - Closest `README.md` or source-adjacent documentation: detailed implementation behavior and operations.
 - `RUNNING.md`: authoritative commands and verification caveats.
 
 Do not duplicate a full checklist or technical schema into the vault. Link to the owning source.
+
+## Operations and telemetry boundary
+
+1. `OPERATIONS.md` records credential and project **names** and where they are held. Never read,
+   print, copy, or request a secret value there or anywhere else. `gcp-key.json` in the repository
+   root is untracked local credential material: do not open it.
+2. Analytics installed in code is not the same as a metric retrievable in production. Today the whole
+   instrumentation is `<Analytics />` and `<SpeedInsights />` in `src/pages/_app.tsx`; there is no
+   `track()` call and no search-outcome event. Do not report a metric no code emits.
+3. Search runs in the browser, so its `console.error` output never reaches Vercel logs. Only
+   `getStaticProps`, ISR regeneration, and `/api/browse/unofficial` produce server-side log lines.
+4. Production identity is recorded in `OPERATIONS.md` (owner supplied 2026-09-11).
+   Verify production claims independently; knowing the URL does not establish analytics access.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
 

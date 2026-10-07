@@ -23,13 +23,120 @@ beforeEach(() => {
     value instanceof Error && value.name === 'CanceledError') as never;
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'info').mockImplementation(() => {});
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 describe('requestJson', () => {
+  it('stops a stalled server request within five seconds as unavailable', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+    mockedAxios.get.mockImplementation((_url, config) => new Promise((_resolve, reject) => {
+      config?.signal?.addEventListener?.('abort', () => {
+        const error = new Error('cancelled');
+        error.name = 'CanceledError';
+        reject(error);
+      });
+    }));
+    let result: unknown;
+    const pending = requestJson({ endpoint: 'cerebro/query', url: 'https://example.test' })
+      .then(value => { result = value; });
+
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    expect(result).toEqual({ status: 'unavailable', reason: 'cerebro/query: deadline exceeded' });
+    await pending;
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('shares the server deadline across retries rather than restarting it', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    mockedAxios.get.mockImplementationOnce(() => new Promise((_resolve, reject) => {
+      setTimeout(() => reject(axiosError({ status: 503 })), 4_000);
+    })).mockImplementation((_url, config) => new Promise((_resolve, reject) => {
+      config?.signal?.addEventListener?.('abort', () => {
+        const error = new Error('cancelled');
+        error.name = 'CanceledError';
+        reject(error);
+      });
+    }));
+    let result: unknown;
+    const pending = requestJson({ endpoint: 'test', url: 'https://example.test' })
+      .then(value => { result = value; });
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    expect(result).toEqual({ status: 'unavailable', reason: 'test: deadline exceeded' });
+    await pending;
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.get.mock.calls[1][1]?.timeout).toBeLessThanOrEqual(1_000);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('lets caller cancellation interrupt retry backoff without another request', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+    vi.spyOn(Math, 'random').mockReturnValue(0.9);
+    mockedAxios.get.mockRejectedValue(axiosError({ status: 503 }));
+    const controller = new AbortController();
+    let rejection: unknown;
+    const pending = requestJson({ endpoint: 'test', url: 'https://example.test', signal: controller.signal })
+      .catch(error => { rejection = error; });
+    await vi.advanceTimersByTimeAsync(0);
+    controller.abort();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(isAbortError(rejection)).toBe(true);
+    await pending;
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('preserves the browser timeout and does not emit server timing logs', async () => {
+    vi.stubGlobal('window', {});
+    mockedAxios.get.mockResolvedValue({ data: [] });
+    await requestJson({ endpoint: 'test', url: 'https://example.test' });
+    expect(mockedAxios.get.mock.calls[0][1]?.timeout).toBe(12_000);
+    expect(console.info).not.toHaveBeenCalled();
+  });
+
+  it('expires during retry backoff without starting another upstream attempt', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+    vi.spyOn(Math, 'random').mockReturnValue(0.9);
+    mockedAxios.get.mockImplementation(() => new Promise((_resolve, reject) => {
+      setTimeout(() => reject(axiosError({ status: 503 })), 4_900);
+    }));
+    const pending = requestJson({ endpoint: 'test', url: 'https://example.test' });
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(pending).resolves.toEqual({ status: 'unavailable', reason: 'test: deadline exceeded' });
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('does not call the upstream when the caller already cancelled', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(requestJson({ endpoint: 'test', url: 'https://example.test', signal: controller.signal }))
+      .rejects.toMatchObject({ name: 'AbortError' });
+    expect(mockedAxios.get).not.toHaveBeenCalled();
+  });
+
+  it('logs safe completion timing without response content or query text', async () => {
+    mockedAxios.get.mockResolvedValue({ data: ['private response'] });
+    await requestJson({ endpoint: 'cerebro/query', url: 'https://example.test?input=private-query' });
+    const logged = vi.mocked(console.info).mock.calls.flat().join(' ');
+    expect(logged).toContain('cerebro/query');
+    expect(logged).toContain('outcome=success');
+    expect(logged).toMatch(/duration_ms=\d+/);
+    expect(logged).toContain('attempts=1');
+    expect(logged).not.toContain('private');
+    expect(logged).not.toContain('https://');
+  });
+
   it('returns the parsed body on success', async () => {
     mockedAxios.get.mockResolvedValue({ data: [{ ok: true }] });
 

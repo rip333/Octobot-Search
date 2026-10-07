@@ -11,6 +11,7 @@ import SearchBar from '@/components/search-bar/SearchBar';
 import { fetchCerebroCards } from '@/api/cerebro';
 import { OFFICIAL_ONLY, all, predicate, serializeCerebroQuery } from '@/api/cerebroQuery';
 import { isCerebroCardId } from '@/api/routeParams';
+import { timeStaticProps } from '@/api/staticPropsTiming';
 import {
   CONTENT_REVALIDATE_SECONDS,
   NOT_FOUND_REVALIDATE_SECONDS,
@@ -52,7 +53,7 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => ({
   fallback: 'blocking',
 });
 
-export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params }) => {
+export const getStaticProps: GetStaticProps<PageProps, Params> = timeStaticProps<PageProps, Params>('/card/[id]', async ({ params }) => {
   const id = params?.id;
 
   // Reject malformed IDs before querying, so crawlers cannot mint cache entries.
@@ -77,6 +78,6 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async ({ params
   }
 
   throw new UpstreamUnavailableError(result.reason);
-};
+});
 
 export default Page;

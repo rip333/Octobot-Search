@@ -12,6 +12,10 @@ the user explicitly asks. Codex owns that workflow through
 Preserve unrelated dirty changes. Do not stage, commit, push, deploy, or change external project settings
 unless the owner explicitly requests it.
 
+`OPERATIONS.md` and `AUDIT_REPORT.md` are reference, not work queues. Read them for production and
+telemetry facts; take work only from `TODO.md`. Never read or print a secret value, including
+`gcp-key.json`. Full ownership and the operations boundary are in `AGENTS.md`.
+
 ## Repository skills
 
 - Use `/octobot-search-slice <exact TODO.md heading>` to execute one bounded implementation slice.

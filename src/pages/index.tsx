@@ -16,6 +16,7 @@ import {
   UpstreamUnavailableError,
 } from '@/api/revalidate';
 import { isUpstreamFailure, listOrEmpty } from '@/api/result';
+import { timeStaticProps } from '@/api/staticPropsTiming';
 
 interface HomeProps {
   sets: CardSet[];
@@ -48,7 +49,7 @@ const Home: React.FC<HomeProps> = ({ sets, packs, setsUnavailable, packsUnavaila
   );
 };
 
-export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = timeStaticProps<HomeProps>('/', async () => {
   // Community data is fetched on demand by `/api/browse/unofficial`, so the
   // default view only pays for the two official listings.
   const [setsResult, packsResult] = await Promise.all([
@@ -77,6 +78,6 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
       ? PARTIAL_FAILURE_REVALIDATE_SECONDS
       : LISTING_REVALIDATE_SECONDS,
   };
-};
+});
 
 export default Home;

@@ -53,3 +53,6 @@ next-env.d.ts
 /obsidian*/
 /.claude*/
 /.agents*/
+AUDIT_REPORT.md
+OPERATIONS.md
+TODO.md
