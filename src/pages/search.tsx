@@ -12,6 +12,7 @@ import PageMeta from '@/components/page-meta/PageMeta';
 import SearchBar from '@/components/search-bar/SearchBar';
 import { fetchCerebroCards } from '@/api/cerebro';
 import { isUpstreamFailure } from '@/api/result';
+import styles from './search.module.css';
 
 type SearchStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
 
@@ -135,14 +136,14 @@ const Search: React.FC = () => {
             <SearchBar />
             <main>
                 {status === 'idle' && (
-                    <p className="text-center px-4 py-8 text-white">
+                    <p className={styles.idle}>
                         Enter a card name, rules text, or trait to search.
                     </p>
                 )}
                 {status === 'loading' && <Loading />}
                 {status === 'success' && isFallback && (
-                    <div className="flex justify-center mt-4 mb-2 px-4">
-                        <p role="status" className="text-yellow-400 bg-gray-800/80 px-4 py-2 rounded-lg text-sm font-medium border border-yellow-500/30">
+                    <div className={styles.fallbackRow}>
+                        <p role="status" className={styles.fallbackNotice}>
                             No exact matches found. Showing partial matches instead.
                         </p>
                     </div>
@@ -152,7 +153,7 @@ const Search: React.FC = () => {
                 )}
                 {status === 'empty' && <NoResults />}
                 {status === 'error' && (
-                    <div role="alert" className="flex flex-col items-center gap-3 px-4 py-8 text-white">
+                    <div role="alert" className={styles.error}>
                         <p>{errorMessage}</p>
                         <button type="button" onClick={() => setRetryCount(count => count + 1)}>Try again</button>
                     </div>

@@ -32,7 +32,7 @@ contract.
   src/__tests__/pages/cards.getStaticProps.test.ts` passed 2 files / 51 tests. Do not rewrite this seam
   unless a current reproduction fails. The owner's live Cerebro counts (123 Aggression cards and 328
   allies) are dated external observations, not fixed test expectations.
-- [ ] **P0 - Remove inert Tailwind remnants.** `src/globals.css` has no Tailwind layers, while
+- [x] **P0 - Remove inert Tailwind remnants.** `src/globals.css` has no Tailwind layers, while
   `src/pages/search.tsx` still has four utility-class sites and `src/pages/_app.tsx` has one. Tailwind
   remains in PostCSS/configuration and `devDependencies` even though those selectors are not generated.
 - [ ] **P1 - Relevance is the default search ordering.** Search reverses Cerebro's result, then
@@ -67,22 +67,22 @@ dependencies.
 
 ### Ordered work
 
-- [ ] Read the current search-page tests, CSS Modules, PostCSS configuration, and the relevant Next.js
+- [x] Read the current search-page tests, CSS Modules, PostCSS configuration, and the relevant Next.js
   16 guides under `node_modules/next/dist/docs/` before editing.
-- [ ] Run the two focused route suites named under Reconciled evidence. If they fail, stop and report the
+- [x] Run the two focused route suites named under Reconciled evidence. If they fail, stop and report the
   contradiction instead of folding an unplanned route repair into this styling slice.
-- [ ] Move the four search-page utility-class groups into a page-local CSS Module and apply named module
+- [x] Move the four search-page utility-class groups into a page-local CSS Module and apply named module
   classes to the idle, partial-match, and error UI.
-- [ ] Remove the `_app.tsx` `font-sans` class while retaining both `next/font` classes.
-- [ ] Remove Tailwind from PostCSS, delete `tailwind.config.ts`, uninstall `tailwindcss`, and refresh the
+- [x] Remove the `_app.tsx` `font-sans` class while retaining both `next/font` classes.
+- [x] Remove Tailwind from PostCSS, delete `tailwind.config.ts`, uninstall `tailwindcss`, and refresh the
   lockfile. Retain PostCSS/autoprefixer only if the current Next.js configuration still uses them.
-- [ ] Add focused regressions for the styled search states and a repository-level guard for the
+- [x] Add focused regressions for the styled search states and a repository-level guard for the
   no-Tailwind contract.
-- [ ] Update `CONTEXT.md` from "Tailwind CSS plus CSS Modules" to the verified post-change styling
+- [x] Update `CONTEXT.md` from "Tailwind CSS plus CSS Modules" to the verified post-change styling
   contract.
-- [ ] Run focused tests first, then `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, and
+- [x] Run focused tests first, then `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, and
   `npm audit --omit=dev --audit-level=info`; record exact results and any live-Cerebro boundary.
-- [ ] Replace `REPORT.md` with the completed slice report only after reviewing the diff against this
+- [x] Replace `REPORT.md` with the completed slice report only after reviewing the diff against this
   contract and `AGENTS.md`.
 
 ### Completion criteria

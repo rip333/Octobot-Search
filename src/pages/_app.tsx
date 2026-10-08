@@ -20,7 +20,7 @@ const manrope = localFont({
 
 function MyApp({ Component, pageProps }: AppProps) {
     return (
-        <div className={`${manrope.variable} ${manrope.className} font-sans`}>
+        <div className={`${manrope.variable} ${manrope.className}`}>
             <Component {...pageProps} />
             <Analytics />
             <SpeedInsights />
