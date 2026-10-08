@@ -11,16 +11,16 @@ and print-sheet layout (Photoshop/ExtendScript, ImageMagick).
 - **Card Browser:** browse official sets and packs, plus community sets loaded on demand.
 - **Search:** official Cerebro cards only, with exact-then-partial matching.
 - **Static Generation:** `getStaticProps`/`getStaticPaths` with ISR.
-- **Styling:** CSS Modules, `src/globals.css`, and a small amount of inline `style`. See "Styling"
-  below for the current Tailwind status.
+- **Styling:** CSS Modules, `src/globals.css`, and a small amount of inline `style`. Tailwind is
+  removed; see "Styling" below.
 - **Analytics:** Vercel Web Analytics and Speed Insights, page-level only. No custom events.
 
 ## Tech Stack
 - **Framework:** Next.js 16 (Pages router)
 - **Language:** TypeScript 5 (target ES2022), Python (scripts), ExtendScript (Photoshop)
 - **UI:** React 19
-- **Styling:** CSS Modules plus `globals.css`, compiled through PostCSS. Tailwind is still installed
-  and configured but emits nothing; see "Styling".
+- **Styling:** CSS Modules plus `globals.css`, compiled through PostCSS (autoprefixer only). Tailwind
+  is not installed; see "Styling".
 - **Data fetching:** Axios, behind the shared client in `src/api/`
 - **Testing:** Vitest, Testing Library (jsdom opt-in per file for component tests)
 - **Deployment:** Vercel only
@@ -112,12 +112,12 @@ returns when both community sources fail.
 
 ## Styling
 
-There are no `@tailwind` directives anywhere in `src/`, so the Tailwind PostCSS plugin generates no
-utility CSS. `tailwindcss`, `tailwind.config.ts`, and the PostCSS plugin entry are still present, and
-five utility-class sites remain in source (four in `src/pages/search.tsx`, one in
-`src/pages/_app.tsx`). Those class names are inert: they render as unstyled markup. Removing the
-residue is the active `TODO.md` slice. Until it lands, CSS Modules plus `globals.css` are the only
-styling that actually applies.
+CSS Modules plus `src/globals.css` are the only styling system. Tailwind is gone: no `tailwindcss`
+dependency, no `tailwind.config.ts`, and `postcss.config.js` lists only `autoprefixer`. The search
+page's idle, partial-match, and error states are styled by the page-local
+`src/pages/search.module.css`. `src/pages/_app.tsx` applies the local Manrope font through
+`manrope.variable` and `manrope.className` from `next/font/local`. `src/__tests__/noTailwind.test.ts`
+fails if Tailwind config, the plugin, the dependency, or utility class strings return.
 
 Card sizing is CSS-only — no viewport measurement in React.
 

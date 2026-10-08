@@ -154,3 +154,45 @@ describe('search page', () => {
     expect(screen.queryByText(/NO RESULTS FOUND/i)).toBeNull();
   });
 });
+
+describe('search page status styling', () => {
+  const classesOf = (el: HTMLElement) => Array.from(el.classList);
+
+  it('styles the idle prompt through the page CSS Module', () => {
+    routerState.isReady = true;
+    routerState.query = {};
+    render(<Search />);
+
+    const prompt = screen.getByText(/Enter a card name/i);
+    expect(classesOf(prompt).some(name => name.includes('idle'))).toBe(true);
+    expect(getComputedStyle(prompt).textAlign).toBe('center');
+  });
+
+  it('styles the partial-match notice and keeps its status role', async () => {
+    fetchCerebroCards
+      .mockResolvedValueOnce({ status: 'empty' })
+      .mockResolvedValueOnce({ status: 'success', data: [makeCard('1', 'Spider-Man')] });
+
+    routerState.isReady = true;
+    routerState.query = { query: 'spidr man' };
+    render(<Search />);
+
+    const notice = await screen.findByText(/No exact matches found/i);
+    expect(notice.getAttribute('role')).toBe('status');
+    expect(classesOf(notice).some(name => name.includes('fallbackNotice'))).toBe(true);
+    expect(getComputedStyle(notice).fontWeight).toBe('500');
+  });
+
+  it('styles the error state, keeps its alert role, and offers retry', async () => {
+    fetchCerebroCards.mockResolvedValue({ status: 'unavailable', reason: 'cerebro/query: HTTP 503' });
+
+    routerState.isReady = true;
+    routerState.query = { query: 'spider' };
+    render(<Search />);
+
+    const alert = await screen.findByRole('alert');
+    expect(classesOf(alert).some(name => name.includes('error'))).toBe(true);
+    expect(getComputedStyle(alert).flexDirection).toBe('column');
+    expect(screen.getByRole('button', { name: /try again/i })).toBeDefined();
+  });
+});
