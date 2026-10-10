@@ -28,7 +28,8 @@ and print-sheet layout (Photoshop/ExtendScript, ImageMagick).
 ## Key Directories & Files
 - `src/api/` — the only place external HTTP happens. See "External data" below.
 - `src/pages` — Next routes and page components.
-- `src/pages/api/browse/unofficial.ts` — the single internal API route; community sets on demand.
+- `src/pages/api/browse/unofficial.ts` — community sets on demand.
+- `src/pages/api/card-images/v1/[origin]/[...filename].ts` — cacheable Cerebro image bytes.
 - `src/components` — reusable UI components.
 - `src/models` — the narrow, consumed subset of each upstream shape.
 - `src/utils` — pure helpers (collections, filtering, rules tokenizing, card vocabulary, contrast).
@@ -49,6 +50,7 @@ and print-sheet layout (Photoshop/ExtendScript, ImageMagick).
 | `/rip` | fully static, no data fetching |
 | `/creators/[id]` | `getServerSideProps` returning `notFound` — intentionally disabled |
 | `/api/browse/unofficial` | API route; Cerebro unofficial sets plus Merlin packs |
+| `/api/card-images/v1/[origin]/[...filename]` | GET/HEAD; bounded R2 reads with browser/CDN caching |
 | `/404`, `/500` | static error pages |
 
 Only the homepage and the static pages are generated at build time. Every card and collection page is
@@ -72,9 +74,13 @@ All upstream access goes through `src/api/`:
 - `routeParams.ts` — route-parameter contracts for the dynamic card routes.
 - `cerebro.ts` / `merlin.ts` — the typed clients.
 - `revalidate.ts` — ISR policy and `UpstreamUnavailableError`.
+- `cardImageSource.ts` / `cardImageBinary.ts` — canonical same-origin Cerebro art keys and bounded
+  raster reads, without JSON-client retries. See `src/api/IMAGE_DELIVERY.md` for the full contract.
+- `cardImageStructure.ts` — bounded JPEG/PNG/GIF/WebP container checks before cacheable success;
+  rejects incomplete files without decompressing or transforming pixels.
 
-`src/api/` has three kinds of caller: page `getStaticProps` (server, at build and on ISR regeneration),
-the `/api/browse/unofficial` route (server), and `src/pages/search.tsx` (browser). Search runs its
+`src/api/` has callers in page `getStaticProps` (server, at build and on ISR regeneration),
+internal API routes (server), and `src/pages/search.tsx` (browser). Search runs its
 Cerebro requests directly from the visitor's browser, so search traffic reaches Cerebro without
 appearing in Vercel server logs.
 
@@ -92,8 +98,10 @@ Merlin — `https://mc4db.merlindumesnil.net/api/public`
 - `/packs/`
 - `/cards/<pack_code>`
 
-Card art hosts are allowlisted in `next.config.js` (`cerebrodatastorage.blob.core.windows.net`,
-`mc4db.merlindumesnil.net`, `db.merlindumesnil.net`) with `images.unoptimized: true`.
+Cerebro art is rewritten to the same-origin image endpoint, including old Azure URLs in API metadata.
+The fixed source is Unicorn's R2 root. Merlin stays direct on `mc4db.merlindumesnil.net` and
+`db.merlindumesnil.net`; these remain in `next.config.js`. `images.unoptimized: true` avoids image
+transformation usage. These are local implementation facts; production migration is not yet verified.
 
 ## Caching policy
 
@@ -109,6 +117,11 @@ Card art hosts are allowlisted in `next.config.js` (`cerebrodatastorage.blob.cor
 `/api/browse/unofficial` sets its own `Cache-Control`: `s-maxage=3600, stale-while-revalidate=86400`
 when healthy, `s-maxage=120, stale-while-revalidate=600` when partial, and `no-store` on the 503 it
 returns when both community sources fail.
+
+Cerebro image 200 responses use seven-day browser freshness and thirty-day shared-CDN freshness;
+genuine 404s use sixty seconds at the CDN. Other failures are no-store. Unlike ISR, this is an ordinary
+HTTP response cache, regional and evictable. See `src/api/IMAGE_DELIVERY.md` for validation, observability,
+invalidation and the separate hosted cache-hit verification gate.
 
 ## Styling
 

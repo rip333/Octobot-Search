@@ -84,10 +84,41 @@ describe('CardImage orientation', () => {
     expect(container.querySelector('[data-orientation="portrait"]')).not.toBeNull();
   });
 
-  it('prefers an explicit ImageUrl over the Cerebro path', () => {
-    render(<CardImage card={makeCard({ ImageUrl: 'https://example.test/art.webp' })} artificialId="0001" />);
+  it('prefers and migrates an explicit ImageUrl over the constructed path', () => {
+    render(<CardImage card={makeCard({ ImageUrl: 'https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/official/00002.jpg' })} artificialId="0001" />);
 
-    expect(image()!.getAttribute('src')).toContain('example.test');
+    const url = new URL(image()!.getAttribute('src')!, 'http://localhost:3000');
+    expect(url.pathname).toBe('/api/card-images/v1/official/00002.jpg');
+    expect(url.origin).toBe('http://localhost:3000');
+    expect(image()!.getAttribute('srcset')).toBeNull();
+  });
+});
+
+describe('Cerebro same-origin delivery', () => {
+  it.each([
+    [{ Id: '00001' }, false, '/official/00001.jpg'],
+    [{ Official: false, Id: 'custom-1' }, false, '/unofficial/custom-1.jpg'],
+    [{ Official: false, Id: '237660307835715585/01001B' }, false, '/unofficial/237660307835715585/01001B.jpg'],
+    [{ ImageUrl: 'https://pub-d27e6715f4ba4529bc9d8fd13938a5a1.r2.dev/cerebro-cards/official/00002.jpg' }, false, '/official/00002.jpg'],
+    [{ BackImageUrl: 'https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/official/00001B.jpg' }, true, '/official/00001B.jpg'],
+  ] as const)('keeps resolved art stable across rerenders without origin or optimizer variants', (card, showBack, suffix) => {
+    const props = { card: makeCard(card), showBack };
+    const { rerender, container } = render(<CardImage {...props} />);
+    const src = image()!.getAttribute('src')!;
+    expect(new URL(src, 'http://localhost:3000').pathname).toBe(`/api/card-images/v1${suffix}`);
+    expect(image()!.getAttribute('loading')).toBe('lazy');
+    expect(image()!.getAttribute('srcset')).toBeNull();
+    rerender(<CardImage {...props} />);
+    expect(image()!.getAttribute('src')).toBe(src);
+    fireEvent.error(image()!);
+    expect(fallback()).not.toBeNull();
+    expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('shows the placeholder for unsupported explicit URLs without fetching them', () => {
+    const { container } = render(<CardImage card={makeCard({ ImageUrl: 'https://unknown.test/card.jpg' })} />);
+    expect(fallback()).not.toBeNull();
+    expect(container.querySelector('img')).toBeNull();
   });
 });
 
