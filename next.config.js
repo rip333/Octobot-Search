@@ -2,13 +2,8 @@
 const nextConfig = {
   images: {
     unoptimized: true,
-    // Card art is served from the two upstream card databases only.
+    // Cerebro art uses our same-origin cache endpoint; Merlin stays direct.
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'cerebrodatastorage.blob.core.windows.net',
-        pathname: '/cerebro-cards/**',
-      },
       {
         protocol: 'https',
         hostname: 'mc4db.merlindumesnil.net',

@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 /**
  * Next turns a static image import into `{ src, width, height }`; Vite would
@@ -26,6 +26,7 @@ export default defineConfig({
     },
   },
   test: {
+    exclude: [...configDefaults.exclude, '**/.claude/**'],
     // Node by default; files that need a DOM opt in with
     // `// @vitest-environment jsdom` so pure logic tests stay fast.
     environment: 'node',

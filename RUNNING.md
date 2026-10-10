@@ -92,6 +92,67 @@ safe page timing with unchanged error propagation, and an actual local HTTP
 connection that never sends response headers. The stalled-connection check uses
 a short explicit budget; the default 5s server budget is tested with fake time.
 
+## Cerebro R2 image slice — verified locally 2026-10-10
+
+- `npm run typecheck`: exit 0.
+- `npm run lint`: exit 0.
+- `npm test -- --hookTimeout=30000 --maxWorkers=2`: exit 0, 27 files / 260 tests.
+- `npm run build`: exit 0 with live official packs/sets healthy; final homepage `getStaticProps`
+  completed in 224 ms with one-hour revalidation. The image API route appears in the build output.
+- Initial `npm audit --omit=dev --audit-level=info`, before pulling the dependency upgrades: exit 1,
+  four vulnerability groups: Axios,
+  Next.js, sharp and source-map-js (three high, one critical). Dependencies/lockfile are unchanged;
+  that initial audit was not clean. The later pulled upgrade resolves these findings, as verified below.
+
+Actual local production-server checks returned the official JPEG (264,964 bytes), HEAD 200 with
+matching content length and no body, and creator-scoped unofficial JPEG (315,207 bytes). Both use
+the intended browser/CDN headers. An unexpected query returned 400/no-store. Across the direct
+source checks and local route checks, exactly five live image reads were made, involving two distinct
+images; there was no catalog crawl or cache warming. Local servers were stopped after verification.
+
+The real unofficial sample exposed a creator/card ID that the initial single-filename resolver
+rejected. Its focused regression failed before the catch-all/path-contract fix, then passed in the
+full suite. HTTP fixture regressions use the real Axios adapter for redirects, chunked oversized
+responses and a stalled body. Component fixtures check stable local image source attributes and no
+direct-origin fallback; they do not exercise a real browser's cache.
+
+Initial lint discovered generated code in nested `.claude` worktrees; lint, TypeScript and Vitest now
+explicitly exclude that directory while retaining normal defaults. A typecheck immediately after
+the route rename encountered stale `.next/types` referencing the old filename; rebuilding regenerated
+the route types and the standalone typecheck passed. An initial component assertion was adjusted for
+Next's absolute localhost URL rendering, while still asserting same-origin delivery and no optimizer.
+
+Source, guardrails, cache headers and release/invalidation instructions live in
+`src/api/IMAGE_DELIVERY.md`. No deployment or provider change occurred. Hosted CDN hits, real-browser
+cache reuse and account-wide quota checks remain separate authorized release gates.
+
+## Review fix — 2026-10-10, after pulling main `dfb540c`
+
+Incomplete raster files now return 503/no-store before cacheable success. The new structure checker
+walks bounded container bytes without image decoding/transformation; it does not prove arbitrary
+compressed pixel data is decodable. All success fixtures are locally generated complete images,
+including progressive JPEG, animated GIF/WebP and alpha WebP. Ten new truncation cases failed before
+the fix. Prefix/block/chunk tests and real HTTP GET/HEAD tests cover the corrected behavior, and
+synchronous validation is accounted for in the total deadline.
+
+The pulled dependency upgrades were installed with `npm ci --ignore-scripts` without changing the
+lockfile. Verification uses Next 16.4.0 and Axios 1.20.0. The production audit now passes with zero
+vulnerabilities; the initial audit finding above is historical.
+
+Final checks: typecheck and lint exit 0; direct full Vitest run below exits 0 (29 files / 306 tests);
+`npm run build` exits 0 with live packs/sets healthy and 226 ms homepage data generation;
+`npm audit --omit=dev --audit-level=info` exits 0 with zero vulnerabilities; `git diff --check` exits 0.
+
+On Windows, the npm wrapper failed to forward the earlier hook-timeout options, leading to three
+10-second import-hook timeouts during the post-pull review. The direct Vitest command correctly
+applies the allowance; it does not change HTTP deadlines:
+
+```powershell
+node node_modules/vitest/vitest.mjs run --hookTimeout=30000 --maxWorkers=2
+```
+
+No live image requests, deployment, staging, commits or pushes were performed for this review fix.
+
 ## Deployment boundary
 
 Vercel's Git integration owns production deployment. Local verification and GitHub Actions do not

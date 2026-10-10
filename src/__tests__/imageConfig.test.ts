@@ -10,12 +10,12 @@ describe('next image config', () => {
     expect(nextConfig.images?.unoptimized).toBe(true);
   });
 
-  it('still declares the upstream card hosts', () => {
+  it('retains Merlin hosts and removes the old Cerebro origin', () => {
     const hosts = (nextConfig.images?.remotePatterns ?? []).map(
       (pattern: { hostname: string }) => pattern.hostname,
     );
 
-    expect(hosts).toContain('cerebrodatastorage.blob.core.windows.net');
+    expect(hosts).not.toContain('cerebrodatastorage.blob.core.windows.net');
     expect(hosts).toContain('mc4db.merlindumesnil.net');
     expect(hosts).toContain('db.merlindumesnil.net');
   });

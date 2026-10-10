@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Card } from '../../models/Card';
 import styles from './CardImage.module.css';
+import { canonicalImageSource, R2_IMAGE_ROOT } from '@/api/cardImageSource';
 
 interface CardImageProps {
   card: Card;
@@ -11,7 +12,7 @@ interface CardImageProps {
   priority?: boolean;
 }
 
-const CEREBRO_IMAGE_BASE_URL = 'https://cerebrodatastorage.blob.core.windows.net/cerebro-cards/';
+const CEREBRO_IMAGE_BASE_URL = R2_IMAGE_ROOT;
 
 /** Card stock comes in exactly two orientations; both are known before render. */
 const PORTRAIT = { width: 365, height: 515 };
@@ -44,14 +45,14 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = fa
   // Remembering *which* URL failed rather than a bare flag means switching
   // printings retries the new image instead of inheriting the old failure.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const source = imageUrl(card, artificialId, showBack);
+  const source = canonicalImageSource(imageUrl(card, artificialId, showBack));
   const failed = failedUrl === source;
   const { width, height } = isLandscape(card) ? LANDSCAPE : PORTRAIT;
   const orientation = isLandscape(card) ? 'landscape' : 'portrait';
 
   // Intrinsic dimensions are reserved either way, so a failed image does not
   // reflow everything below it.
-  if (failed) {
+  if (failed || !source) {
     return (
       <div className={styles.frame} data-orientation={orientation}>
         <div className={styles.fallback} role="img" aria-label={`${card.Name} (image unavailable)`}>
@@ -64,6 +65,7 @@ const CardImage: React.FC<CardImageProps> = ({ card, artificialId, showBack = fa
   return (
     <div className={styles.frame} data-orientation={orientation}>
       <Image
+        unoptimized
         className={styles.image}
         src={source}
         alt={card.Name}
